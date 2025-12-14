@@ -133,6 +133,6 @@ For any issues please contact us via [mail](mailto:queenb.community@gmail.com) o
 
 **Happy Coding! :)**
 
-## Hi Myname is miryam
+## Hi My name is miryam 
 ## Hi My Name is Or 
 ## Hi My Name is Ori 
