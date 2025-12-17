@@ -8,32 +8,6 @@
   gap: 8px;
 }
 
-.navButton {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  border: none;
-  background: transparent;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 15px;
-  color: #53474F;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  text-align: left;
-  width: 100%; 
-}
-
-.navButton:hover {
-  background-color: #ffeef2;
-}
-
-.active {
-  background-color: #FF7D9C !important; 
-  color: white;
-}
-
 .iconWrapper {
   display: flex;
   align-items: center;

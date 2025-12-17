@@ -1,0 +1,16 @@
+.selectInput {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background-color: white;
+  color: #53474F;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  min-width: 120px;
+  transition: border-color 0.2s ease;
+}
+
+.selectInput:focus {
+  border-color: #FF7D9C;
+}

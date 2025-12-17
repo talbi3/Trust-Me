@@ -1,20 +1,20 @@
 import PropTypes from 'prop-types';
 import styles from './Sidebar.module.css';
+import Button from '../common/Button/Button.jsx';
 
 const Sidebar = ({ items, activeTab, onTabChange }) => {
   return (
     <div className={styles.container}>
       {items.map((item) => (
-        <button
+        <Button
           key={item.id}
-          className={`${styles.navButton} ${activeTab === item.id ? styles.active : ''}`}
+          variant="ghost"           
+          isActive={activeTab === item.id} 
           onClick={() => onTabChange(item.id)}
         >
-          <span className={styles.iconWrapper}>
-            {item.icon}
-          </span>
+          {item.icon} 
           {item.label}
-        </button>
+        </Button>
       ))}
     </div>
   );

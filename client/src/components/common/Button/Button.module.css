@@ -1,0 +1,114 @@
+.base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; 
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+
+.base:disabled {
+  background-color: #ccc !important;
+  color: white !important;
+  cursor: not-allowed;
+  border-color: transparent !important;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------ */
+/* 1. Primary */
+/* ------------------------------------------------ */
+.primary {
+  padding: 10px 20px;
+  background-color: #FF7D9C;
+  color: white;
+  border-radius: 4px;
+  font-size: 16px;
+  border: none;
+}
+
+.primary:hover {
+  background-color: #ff517a;
+}
+
+/* ------------------------------------------------ */
+/* 2. Secondary: (Connect / Send) */
+/* ------------------------------------------------ */
+.secondary {
+  background-color: #40414f;
+  color: white;
+  border: 1px solid rgba(27,31,36,0.15);
+  border-radius: 20px;
+  padding: 6px 16px; 
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.secondary:hover {
+  background-color: #24292f; 
+}
+
+/* ------------------------------------------------ */
+/* 3. Danger: (Disconnect) */
+/* ------------------------------------------------ */
+.danger {
+  background-color: #cf222e;
+  color: white;
+  border: 1px solid rgba(27,31,36,0.15);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.danger:hover {
+  background-color: #a40e26;
+}
+
+/* ------------------------------------------------ */
+/* 4. Outline: (Cancel / Add) */
+/* ------------------------------------------------ */
+.outline {
+  background-color: transparent;
+  color: #333;
+  border: 1px solid #565869;
+  border-radius: 20px; 
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.outline:hover {
+  background-color: #f0f0f0;
+}
+
+/* ------------------------------------------------ */
+/* 5. Ghost: (Sidebar Nav) */
+/* ------------------------------------------------ */
+.ghost {
+  background-color: transparent;
+  color: #53474F;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: 500;
+  
+  width: 100%; 
+  justify-content: flex-start; 
+  gap: 12px;
+}
+
+.ghost:hover {
+  background-color: #ffeef2; 
+}
+
+.ghostActive {
+  background-color: #FF7D9C !important;
+  color: white !important;
+}
