@@ -1,4 +1,3 @@
-/* הרקע הכהה מאחורי המודל */
 .overlay {
   display: flex;
   justify-content: center;
@@ -13,7 +12,6 @@
   z-index: 1000;
 }
 
-/* הקופסה הלבנה של ההגדרות */
 .modal {
   position: relative;
   display: flex;
@@ -22,19 +20,17 @@
   background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  overflow: hidden; /* שומר שהתוכן לא יגלוש מהפינות העגולות */
+  overflow: hidden; 
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* אזור התוכן המשתנה (איפה שהטאבים נטענים) */
 .content {
   flex: 1;
   padding: 40px;
-  overflow-y: auto; /* מאפשר גלילה רק בתוכן אם הוא ארוך */
+  overflow-y: auto; 
   color: #333;
 }
 
-/* כפתור הסגירה (X) */
 .closeButton {
   position: absolute;
   top: 20px;      

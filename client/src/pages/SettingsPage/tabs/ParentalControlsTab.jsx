@@ -2,23 +2,10 @@ import { useState } from 'react';
 import { FiPlus, FiX } from 'react-icons/fi';
 import Button from '../../../components/common/Button/Button.jsx';
 import layout from './SettingsLayout.module.css';
-import { useSettings } from '../../../context/SettingsContext.jsx';
 
 const ParentalControlsTab = () => {
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [email, setEmail] = useState('');
-  
-  const { addFamilyMember } = useSettings();
-
-  const handleSendInvite = async () => {
-    if (!email) return;
-    
-    await addFamilyMember(email);
-    
-    alert(`Invite sent to ${email}!`); 
-    setIsInviteOpen(false);
-    setEmail('');
-  };
 
   return (
     <div className={layout.pageContainer}>
@@ -72,8 +59,7 @@ const ParentalControlsTab = () => {
               
               <Button 
                 variant={email ? 'secondary' : 'outline'}
-                onClick={handleSendInvite}
-                disabled={!email} 
+                disabled={true} 
               >
                 Send
               </Button>

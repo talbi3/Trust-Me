@@ -4,9 +4,8 @@ import layout from './SettingsLayout.module.css';
 import { useSettings } from '../../../context/SettingsContext.jsx'; 
 
 const NotificationsTab = () => {
-  const { notifications, toggleNotification, loading } = useSettings();
+  const { notifications, toggleNotification } = useSettings();
 
-  if (loading) return <div>Loading...</div>;
 
   return (
     <div className={layout.pageContainer}>

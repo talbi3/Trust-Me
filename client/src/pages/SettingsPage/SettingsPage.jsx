@@ -1,8 +1,12 @@
-import { useNavigate, Outlet, useLocation } from 'react-router';
+import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router'; 
 import { FiBell, FiUsers, FiCommand } from 'react-icons/fi';
 import Sidebar from '../../components/Sidebar/Sidebar.jsx'; 
 import styles from './Settings.module.css'; 
-import { SettingsProvider } from '../../context/SettingsContext.jsx';  
+import { SettingsProvider } from '../../context/SettingsContext.jsx';
+
+import NotificationsTab from './tabs/NotificationsTab';
+import ConnectorsTab from './tabs/ConnectorsTab'; 
+import ParentalControlsTab from './tabs/ParentalControlsTab';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
@@ -10,11 +14,12 @@ const SettingsPage = () => {
 
   const handleClose = () => navigate('/');
 
-  const handleTabChange = (tabId) => {
-     navigate(tabId.toLowerCase());
+const handleTabChange = (tabId) => {
+     navigate(`/settings/${tabId.toLowerCase()}`);
   };
-
-  const currentTab = location.pathname.split('/').pop(); 
+  const pathSegments = location.pathname.split('/');
+  const lastSegment = pathSegments.pop() || pathSegments.pop(); 
+  const currentTab = lastSegment === 'settings' ? 'notifications' : lastSegment;
 
   const menuItems = [
     { id: 'notifications', icon: <FiBell size={18} />, label: 'Notifications' },
@@ -24,25 +29,31 @@ const SettingsPage = () => {
 
   return (
     <SettingsProvider>
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
-        
-        <button className={styles.closeButton} onClick={handleClose}>
-          &times;
-        </button>
+      <div className={styles.overlay}>
+        <div className={styles.modal}>
+          
+          <button className={styles.closeButton} onClick={handleClose}>
+            &times;
+          </button>
 
-        <Sidebar 
-            items={menuItems} 
-            activeTab={currentTab} 
-            onTabChange={handleTabChange} 
-        />
+          <Sidebar 
+              items={menuItems} 
+              activeTab={currentTab} 
+              onTabChange={handleTabChange} 
+          />
 
-        <div className={styles.content}>
-          <Outlet />
+          <div className={styles.content}>
+            <Routes>
+              <Route index element={<Navigate to="notifications" replace />} />
+              
+              <Route path="notifications" element={<NotificationsTab />} />
+              <Route path="apps-and-connectors" element={<ConnectorsTab />} />
+              <Route path="parental-controls" element={<ParentalControlsTab />} />
+            </Routes>
+          </div>
+          
         </div>
-        
       </div>
-    </div>
     </SettingsProvider>
   );
 };

@@ -5,73 +5,57 @@ import api from '../services/api';
 const SettingsContext = createContext();
 
 export const SettingsProvider = ({ children }) => {
-  const [connectors, setConnectors] = useState([]);
-  const [notifications, setNotifications] = useState({ email: false, push: false });
+  const [settings, setSettings] = useState({
+    notifications: { email: false, push: false },
+    connectors: [],
+  });
+  
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchSettings = async () => {
       try {
-        const [appsRes, settingsRes] = await Promise.all([
-          api.get('/settings/connectors'),
-          api.get('/settings/notifications')
-        ]);
-
-        setConnectors(appsRes.data.appsData || appsRes.appsData);  
-        setNotifications(settingsRes.data.notifications || settingsRes.notifications);
+        const response = await api.get('/api/user/settings');
+        
+        setSettings(prev => ({ ...prev, ...response.data }));
       } catch (error) {
         console.error("Failed to fetch settings:", error);
-      }
+      } 
     };
-
-    fetchData();
+    fetchSettings();
   }, []);
 
-  const toggleConnector = async (appId, currentStatus) => {
-    setConnectors(prev => prev.map(app => 
+  const updateSettingsAPI = async (updatedPart) => {
+    setSettings(prev => ({ ...prev, ...updatedPart }));
+
+    try {
+      await api.put('/api/user/settings', updatedPart);
+    } catch (error) {
+      console.error("Failed to save settings:", error);
+    }
+  };
+
+
+  const toggleNotification = (type) => {
+    const updatedNotifications = {
+      ...settings.notifications,
+      [type]: !settings.notifications[type]
+    };
+    updateSettingsAPI({ notifications: updatedNotifications });
+  };
+
+  const toggleConnector = (appId, currentStatus) => {
+    const updatedConnectors = settings.connectors.map(app =>
       app.id === appId ? { ...app, connected: !currentStatus } : app
-    ));
-
-    try {
-      await api.patch(`/settings/connectors/${appId}`, { 
-        connected: !currentStatus 
-      });
-    } catch (error) {
-      console.error("Failed to update connector", error);
-    }
-  };
-
-  const addFamilyMember = async (email) => {
-    try {
-      await api.post('/settings/parental-controls', { 
-        email, 
-        date: new Date().toISOString() 
-      });
-    } catch (error) {
-      console.error("Failed to add family member", error);
-    }
-  };
-
-  const toggleNotification = async (type) => {
-    const newValue = !notifications[type];
-    const updatedNotifications = { ...notifications, [type]: newValue };
-    
-    setNotifications(updatedNotifications);
-
-    try {
-      await api.patch('/settings/notifications', { 
-        notifications: updatedNotifications 
-      });
-    } catch (e) {
-      console.error("Failed to update notifications", e);
-    }
+    );
+    updateSettingsAPI({ connectors: updatedConnectors });
   };
 
   const value = {
-    connectors,
-    notifications,
+    settings,
+    connectors: settings.connectors,       
+    notifications: settings.notifications, 
     toggleConnector,
     toggleNotification,
-    addFamilyMember
   };
 
   return (
@@ -92,3 +76,5 @@ export const useSettings = () => {
   }
   return context;
 };
+
+
