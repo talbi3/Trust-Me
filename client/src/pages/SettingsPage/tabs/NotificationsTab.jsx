@@ -1,37 +1,42 @@
-import { useState } from 'react';
-import ToggleSwitch from '../../../components/common/ToggleSwitch/ToggleSwitch.jsx'; 
-import styles from './NotificationsTab.module.css';
+import ToggleSwitch from '../../../components/common/ToggleSwitch/ToggleSwitch.jsx';
+import SettingsRow from '../../../components/SettingsRow/SettingsRow.jsx'; 
+import layout from './SettingsLayout.module.css'; 
+import { useSettings } from '../../../context/SettingsContext.jsx'; 
+
 const NotificationsTab = () => {
-  const [emailEnabled, setEmailEnabled] = useState(true);
-  const [pushEnabled, setPushEnabled] = useState(false);
+  const { notifications, toggleNotification, loading } = useSettings();
+
+  if (loading) return <div>Loading...</div>;
 
   return (
-    <div className={styles.container}>
+    <div className={layout.pageContainer}>
       
-      <div className={styles.row}>
-        <div className={styles.textContainer}>
-          <div className={styles.label}>Email Notifications</div>
-          <div className={styles.subLabel}>Receive updates about your account activity</div>
-        </div>
-        
-        <ToggleSwitch 
-          isChecked={emailEnabled} 
-          onChange={() => setEmailEnabled(!emailEnabled)} 
-        />
+      <div className={layout.header}>
+        <div className={layout.pageTitle}>Notifications</div>
+        <div className={layout.pageDescription}>Manage how you receive updates.</div>
       </div>
 
-      <div className={styles.row}>
-        <div className={styles.textContainer}>
-          <div className={styles.label}>Push Notifications</div>
-          <div className={styles.subLabel}>Receive notifications on your device</div>
-        </div>
-        
-        <ToggleSwitch 
-          isChecked={pushEnabled} 
-          onChange={() => setPushEnabled(!pushEnabled)} 
-        />
-      </div>
+      <SettingsRow 
+        title="Email Notifications"
+        description="Receive updates about your account activity"
+        action={
+          <ToggleSwitch 
+            isChecked={notifications.email} 
+            onChange={() => toggleNotification('email')} 
+          />
+        }
+      />
 
+      <SettingsRow 
+        title="Push Notifications"
+        description="Receive notifications on your device"
+        action={
+          <ToggleSwitch 
+            isChecked={notifications.push} 
+            onChange={() => toggleNotification('push')} 
+          />
+        }
+      />
     </div>
   );
 };

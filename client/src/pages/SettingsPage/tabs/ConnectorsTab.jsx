@@ -1,71 +1,47 @@
-import { useState } from 'react';
 import { SiYoutube, SiTelegram, SiWhatsapp, SiDiscord } from 'react-icons/si';
-import styles from './ConnectorsTab.module.css';
-import PropTypes from 'prop-types';
 import Button from '../../../components/common/Button/Button.jsx';
+import SettingsRow from '../../../components/SettingsRow/SettingsRow.jsx';
+import layout from './SettingsLayout.module.css';
+import { useSettings } from '../../../context/SettingsContext.jsx'; 
 
-const APPS_DATA = [
-  { id: 1, name: 'WhatsApp', icon: <SiWhatsapp />, color: '#25D366', desc: 'Analyze group chats for bullying' },
-  { id: 2, name: 'Telegram', icon: <SiTelegram />, color: '#26A5E4', desc: 'Flag suspicious secure chats' },
-  { id: 3, name: 'YouTube', icon: <SiYoutube />, color: '#FF0000', desc: 'Filter inappropriate content' },
-  { id: 4, name: 'Discord', icon: <SiDiscord />, color: '#5865F2', desc: 'Safety in gaming servers' },
-];
-
-const AppRow = ({ app }) => {
-   const [isConnected, setIsConnected] = useState(false);
-
-  return (
-    <div className={styles.appRow}>
-      
-       <div className={styles.infoSection}>
-        <div className={styles.iconWrapper} style={{ color: app.color }}>
-          {app.icon}
-        </div>
-        <div className={styles.textWrapper}>
-          <div className={styles.appName}>{app.name}</div>
-          <div className={styles.appDesc}>{app.desc}</div>
-        </div>
-      </div>
-
-       <div className={styles.actionsSection}>
-<Button 
-          variant={isConnected ? 'danger' : 'secondary'} // אדום אם מחובר, שחור אם לא
-          onClick={() => setIsConnected(!isConnected)}
-        >
-          {isConnected ? 'Disconnect' : 'Connect'}
-        </Button>
-  
-      </div>
-
-    </div>
-  );
-};
-
-AppRow.propTypes = {
-  app: PropTypes.shape({
-    id: PropTypes.number,
-    name: PropTypes.string.isRequired,
-    icon: PropTypes.element.isRequired,
-    color: PropTypes.string,
-    desc: PropTypes.string,
-  }).isRequired,
+const APP_CONFIG = {
+  whatsapp: { icon: <SiWhatsapp />, color: '#25D366', desc: 'Analyze group chats' },
+  telegram: { icon: <SiTelegram />, color: '#26A5E4', desc: 'Flag suspicious chats' },
+  youtube:  { icon: <SiYoutube />, color: '#FF0000', desc: 'Filter content' },
+  discord:  { icon: <SiDiscord />, color: '#5865F2', desc: 'Gaming safety' }
 };
 
 const ConnectorsTab = () => {
+  const { connectors, toggleConnector } = useSettings();
+
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.sectionTitle}>Connected Safety Apps</div>
-        <div className={styles.sectionDescription}>
-          Manage your integrations with third-party platforms.
-        </div>
+    <div className={layout.pageContainer}>
+      <div className={layout.header}>
+        <div className={layout.pageTitle}>Connected Apps</div>
+        <div className={layout.pageDescription}>Integrate with 3rd party platforms.</div>
       </div>
 
-      <div className={styles.appsList}>
-        {APPS_DATA.map((app) => (
-          <AppRow key={app.id} app={app} />
-        ))}
-      </div>
+      {connectors.map((app) => {
+        const config = APP_CONFIG[app.id]; 
+        if (!config) return null;
+
+        return (
+          <SettingsRow
+            key={app.id}
+            icon={<span style={{ color: config.color, display: 'flex' }}>{config.icon}</span>}
+            title={app.name} 
+            description={config.desc}
+            action={
+              <Button 
+                variant={app.connected ? 'danger' : 'secondary'} 
+                onClick={() => toggleConnector(app.id, app.connected)} 
+              >
+                {app.connected ? 'Disconnect' : 'Connect'}
+              </Button>
+            }
+          />
+        );
+      })}
     </div>
   );
 };

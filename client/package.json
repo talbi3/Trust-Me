@@ -7,7 +7,8 @@
     "lint": "eslint .",
     "dev": "eslint . && vite",
     "build": "eslint . && vite build",
-    "preview": "eslint . && vite preview"
+    "preview": "eslint . && vite preview",
+    "server": "npx json-server --watch db.json --port 5000"
   },
   "dependencies": {
     "axios": "^1.13.2",

@@ -1,13 +1,11 @@
 import { useNavigate, Outlet, useLocation } from 'react-router';
-import { FiBell, FiUsers ,FiCommand  } from 'react-icons/fi';
-import styles from './Settings.module.css';
+import { FiBell, FiUsers, FiCommand } from 'react-icons/fi';
+import Sidebar from '../../components/Sidebar/Sidebar.jsx'; 
+import styles from './Settings.module.css'; 
+import { SettingsProvider } from '../../context/SettingsContext.jsx';  
 
-import Sidebar from '../../components/Sidebar/Sidebar.jsx';
- 
-
-const Settings = () => {
-
-const navigate = useNavigate();
+const SettingsPage = () => {
+  const navigate = useNavigate();
   const location = useLocation(); 
 
   const handleClose = () => navigate('/');
@@ -24,23 +22,29 @@ const navigate = useNavigate();
     { id: 'parental-controls', icon: <FiUsers size={18} />, label: 'Parental Controls' },
   ];
 
- 
-    return (
-      <div className={styles.overlay}>
-        <div className={styles.modal}>
-          <button className={styles.closeButton} onClick={handleClose}>&times;</button>
- <Sidebar 
+  return (
+    <SettingsProvider>
+    <div className={styles.overlay}>
+      <div className={styles.modal}>
+        
+        <button className={styles.closeButton} onClick={handleClose}>
+          &times;
+        </button>
+
+        <Sidebar 
             items={menuItems} 
             activeTab={currentTab} 
             onTabChange={handleTabChange} 
         />
 
-          <div className={styles.content}>
-            <Outlet />
-          </div>
+        <div className={styles.content}>
+          <Outlet />
         </div>
+        
       </div>
-    );
+    </div>
+    </SettingsProvider>
+  );
 };
 
-export default Settings;
+export default SettingsPage;
