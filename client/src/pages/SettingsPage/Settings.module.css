@@ -1,0 +1,65 @@
+/* הרקע הכהה מאחורי המודל */
+.overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(83, 71, 79, 0.2);
+  backdrop-filter: blur(3px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+/* הקופסה הלבנה של ההגדרות */
+.modal {
+  position: relative;
+  display: flex;
+  width: 800px;
+  height: 550px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  overflow: hidden; /* שומר שהתוכן לא יגלוש מהפינות העגולות */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* אזור התוכן המשתנה (איפה שהטאבים נטענים) */
+.content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto; /* מאפשר גלילה רק בתוכן אם הוא ארוך */
+  color: #333;
+}
+
+/* כפתור הסגירה (X) */
+.closeButton {
+  position: absolute;
+  top: 20px;      
+  right: 20px;    
+  
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;  
+  border: none;
+  background: transparent;
+  
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  color: #555;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background-color: #f0f0f0;  
+  color: #000;
+}
