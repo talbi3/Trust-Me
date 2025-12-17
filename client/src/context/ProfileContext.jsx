@@ -1,8 +1,7 @@
-import { createContext, useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import api from '../services/api';
+import { createContext, useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import api from "../services/api";
 
-// create context
 const ProfileContext = createContext();
 
 const ProfileProvider = ({ children }) => {
@@ -13,10 +12,10 @@ const ProfileProvider = ({ children }) => {
   const getProfile = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/user/profile');
+      const response = await api.get("/api/user/profile");
       setProfile(response.data);
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.error("Error fetching profile:", error);
     } finally {
       setLoading(false);
     }
@@ -25,19 +24,33 @@ const ProfileProvider = ({ children }) => {
   // PUT /api/user/profile
   const updateProfile = async (updatedProfile) => {
     try {
-      const response = await api.put('/api/user/profile', updatedProfile);
+      const response = await api.put("/api/user/profile", updatedProfile);
       if (response.data?.success) {
         setProfile(updatedProfile);
         return true;
       }
       return false;
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error("Error updating profile:", error);
       return false;
     }
   };
 
-  // load profile once when app starts (like DuckContext)
+  // POST /api/uploads/profile-picture
+  const uploadProfilePicture = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      // important: do NOT set Content-Type manually for multipart/form-data
+      const response = await api.post("/api/uploads/profile-picture", formData);
+      return response.data?.url || "";
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+      return "";
+    }
+  };
+
   useEffect(() => {
     getProfile();
   }, []);
@@ -49,6 +62,7 @@ const ProfileProvider = ({ children }) => {
         loading,
         getProfile,
         updateProfile,
+        uploadProfilePicture, 
       }}
     >
       {children}

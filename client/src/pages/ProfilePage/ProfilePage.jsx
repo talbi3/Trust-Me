@@ -3,12 +3,13 @@ import styles from "./ProfilePage.module.css";
 import { ProfileContext } from "../../context/ProfileContext";
 
 export default function ProfilePage() {
-  const { profile, loading, getProfile, updateProfile } = useContext(ProfileContext);
+  const { profile, loading, getProfile, updateProfile } =
+    useContext(ProfileContext);
 
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  // local form state ONLY for edit mode
+  // local form state (edit mode only)
   const [form, setForm] = useState({
     name: "",
     dateOfBirth: "",
@@ -17,7 +18,6 @@ export default function ProfilePage() {
 
   const [status, setStatus] = useState({ type: "", message: "" });
 
-  // ensure profile is loaded (Provider loads too, but this covers refresh / edge cases)
   useEffect(() => {
     if (!profile) getProfile();
   }, [profile, getProfile]);
@@ -30,20 +30,58 @@ export default function ProfilePage() {
 
   const onEdit = () => {
     setStatus({ type: "", message: "" });
-
-    // initialize the form from the current profile (NO useEffect)
     setForm({
       name: viewName,
       dateOfBirth: viewDob,
       profilePictureUrl: viewPic,
     });
-
     setIsEditing(true);
   };
 
   const onCancel = () => {
     setStatus({ type: "", message: "" });
     setIsEditing(false);
+  };
+
+  // ✅ NEW: upload image to backend, then set profilePictureUrl to returned URL
+  const onFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setStatus({ type: "", message: "" });
+    setSaving(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file); // must match upload.single("image") in backend
+
+      const res = await fetch("/api/uploads/profile-picture", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const data = await res.json(); // expected: { url: "/uploads/..." }
+
+      const fullUrl = data.url.startsWith("http")
+  ? data.url
+  : `http://localhost:5000${data.url}`;
+
+setForm((prev) => ({
+  ...prev,
+  profilePictureUrl: fullUrl,
+}));
+
+
+      setStatus({ type: "success", message: "Image uploaded ✅" });
+    } catch {
+      setStatus({ type: "error", message: "Image upload failed. Try again." });
+    } finally {
+      setSaving(false);
+      // allow selecting the same file again if needed
+      e.target.value = "";
+    }
   };
 
   const onSave = async () => {
@@ -53,7 +91,7 @@ export default function ProfilePage() {
     const payload = {
       name: form.name.trim(),
       dateOfBirth: form.dateOfBirth,
-      profilePictureUrl: form.profilePictureUrl.trim(),
+      profilePictureUrl: form.profilePictureUrl,
     };
 
     const ok = await updateProfile(payload);
@@ -77,7 +115,9 @@ export default function ProfilePage() {
           <div>
             <h1 className={styles.title}>Profile</h1>
             <p className={styles.subtitle}>
-              {isEditing ? "Edit your personal details" : "View your personal details"}
+              {isEditing
+                ? "Edit your personal details"
+                : "View your personal details"}
             </p>
           </div>
 
@@ -93,7 +133,11 @@ export default function ProfilePage() {
                 Edit
               </button>
             ) : (
-              <button className={styles.cancelBtn} onClick={onCancel} disabled={isDisabled}>
+              <button
+                className={styles.cancelBtn}
+                onClick={onCancel}
+                disabled={isDisabled}
+              >
                 Cancel
               </button>
             )}
@@ -108,9 +152,6 @@ export default function ProfilePage() {
                   className={styles.avatarImg}
                   src={displayedPic}
                   alt="Profile"
-                  onError={() =>
-                    setForm((prev) => ({ ...prev, profilePictureUrl: "" }))
-                  }
                 />
               ) : (
                 <div className={styles.avatarFallback}>No Image</div>
@@ -120,17 +161,14 @@ export default function ProfilePage() {
             <div className={styles.field}>
               <label className={styles.label}>Profile picture</label>
 
-              {/* View mode: do NOT show URL */}
+              {/* EDIT MODE: upload file */}
               {isEditing && (
                 <input
                   className={styles.input}
-                  type="url"
-                  placeholder="https://..."
-                  value={form.profilePictureUrl}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, profilePictureUrl: e.target.value }))
-                  }
+                  type="file"
+                  accept="image/*"
                   disabled={isDisabled}
+                  onChange={onFileChange}   // ✅ NEW
                 />
               )}
             </div>
@@ -146,9 +184,13 @@ export default function ProfilePage() {
                 <input
                   className={styles.input}
                   type="text"
-                  placeholder="Your name"
                   value={form.name}
-                  onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      name: e.target.value,
+                    }))
+                  }
                   disabled={isDisabled}
                 />
               )}
@@ -165,7 +207,10 @@ export default function ProfilePage() {
                   type="date"
                   value={form.dateOfBirth}
                   onChange={(e) =>
-                    setForm((prev) => ({ ...prev, dateOfBirth: e.target.value }))
+                    setForm((prev) => ({
+                      ...prev,
+                      dateOfBirth: e.target.value,
+                    }))
                   }
                   disabled={isDisabled}
                 />
@@ -179,7 +224,6 @@ export default function ProfilePage() {
                 className={styles.saveBtn}
                 onClick={onSave}
                 disabled={isDisabled || !form.name.trim()}
-                title={!form.name.trim() ? "Name is required" : ""}
               >
                 {saving ? "Saving..." : "Save"}
               </button>
@@ -190,9 +234,7 @@ export default function ProfilePage() {
                 className={`${styles.status} ${
                   status.type === "success"
                     ? styles.success
-                    : status.type === "error"
-                    ? styles.error
-                    : ""
+                    : styles.error
                 }`}
               >
                 {status.message}
