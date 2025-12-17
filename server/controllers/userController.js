@@ -1,4 +1,8 @@
-import User from '../data/User.js';
+import User from '../data/user.js';
+import Settings from "../data/settings.js"; 
+
+// inside createUser, after savedUser:
+
 
 // Get all users
 const getAllUsers = async (req, res) => {
@@ -20,7 +24,6 @@ const getUserByGoogleId = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
 
 // Create a new user
 const createUser = async (req, res) => {
@@ -45,6 +48,11 @@ const createUser = async (req, res) => {
             email,
             fullname,
             profilePicture
+        });
+
+        await Settings.create({
+            userGoogleId: newUser.googleId,
+            // features will be set automatically to defaults (false)
         });
 
         res.status(201).json({ user: newUser });

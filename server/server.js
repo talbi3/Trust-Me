@@ -4,6 +4,8 @@ import cors from "cors";
 import dotenv from "dotenv";              
 
 import userRoutes from "./routes/userRoutes.js"; // Import the users router (handles /users endpoints)
+import settingsRoutes from "./routes/settingsRoutes.js";
+
 
 // Load environment variables from .env into process.env
 dotenv.config();
@@ -27,8 +29,9 @@ app.get("/db-status", (req, res) => {
   });
 });
 
-// Mount the user routes under /users
+// Mount the routers for different API endpoints
 app.use("/users", userRoutes);
+app.use("/settings", settingsRoutes);
 
 // Fired when Mongoose successfully connects to MongoDB
 mongoose.connection.on("connected", () =>
