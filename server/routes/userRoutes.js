@@ -1,16 +1,33 @@
 import express from 'express';
-// Note: We must include the .js extension when using 'import'
-import * as userController from '../controllers/userController.js'; 
+import {
+    getAllUsers,
+    getUserByGoogleId,
+    createUser,
+    deleteUser,
+    updateUser
+} from '../controllers/userController.js';
 
 const router = express.Router();
 
-// Route to create a new user
-router.post('/', userController.createUser);
+/**
+ * Read Only Permission Routes
+ */
+// GET all users
+router.get('/', getAllUsers);
 
-// Route to get all users
-router.get('/', userController.getAllUsers);
+// GET a single user
+router.get('/:googleId', getUserByGoogleId);
 
-// Route to get specific user by Google ID
-router.get('/:googleId', userController.getUserByGoogleId);
+/**
+ * Read and Write Permission Routes
+ */
+// POST a new user
+router.post('/', createUser);
 
-export default router; // This fixes the "default export" error
+// DELETE a user
+router.delete('/:googleId', deleteUser);
+
+// UPDATE a user
+router.patch('/:googleId', updateUser);
+
+export default router;
