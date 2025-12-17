@@ -6,7 +6,10 @@
   "scripts": {
     "start": "eslint . && node server",
     "dev": "eslint . && nodemon server",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "seed": "node scripts/seed.js",
+    "init-dev": "scripts\\init-dev.bat"
+  
   },
   "keywords": [],
   "author": "",
