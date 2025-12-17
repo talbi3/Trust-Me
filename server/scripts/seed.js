@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import User from '../data/user.js';
-// import Duck from '../data/duckData.js'; // If you convert Duck data to a Mongoose model later
+import User from '../data/user.js';       
+import Settings, { buildDefaultFeaturesObject } from '../data/settings.js'; 
 
 dotenv.config();
 
@@ -30,18 +30,28 @@ const seedDB = async () => {
     try {
         // 1. Connect to MongoDB
         await mongoose.connect(process.env.MONGODB_URI);
-        console.log('🌱 Connected to MongoDB...');
+        console.log('Connected to MongoDB...');
 
-        // 2. Clear existing data (Optional: Be careful in production!)
+        // 2. Clear existing data
         await User.deleteMany({});
-        console.log('🧹 Old Users cleared');
+        await Settings.deleteMany({}); // Clear settings too
+        console.log('Old Users & Settings cleared');
 
-        // 3. Insert new Fake Data
+        // 3. Insert new Fake Users
         await User.insertMany(users);
-        console.log('✅ Fake Users added');
+        console.log('Fake Users added');
 
-        // 4. Exit
-        console.log('🏁 Seeding complete!');
+        // 4. Insert default Settings for those users
+        const settingsData = users.map(user => ({
+            userGoogleId: user.googleId,
+            features: buildDefaultFeaturesObject()
+        }));
+
+        await Settings.insertMany(settingsData);
+        console.log('✅ Default Settings added');
+
+        // 5. Exit
+        console.log('Seeding complete!');
         process.exit(0);
 
     } catch (error) {
