@@ -1,53 +1,94 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import express from "express";              // Express: web framework for building HTTP APIs
+import mongoose from "mongoose";           
+import cors from "cors";                    
+import dotenv from "dotenv";              
 
-// Import Routes
-import rubberDuckRoutes from './routes/rubberDucks.js';
-import userRoutes from './routes/userRoutes.js'; 
+import userRoutes from "./routes/userRoutes.js"; // Import the users router (handles /users endpoints)
 
-// 1. Load environment variables FIRST
+// Load environment variables from .env into process.env
 dotenv.config();
 
-const mongoURI = process.env.MONGODB_URI;
-if (!mongoURI) {
-  console.error("❌ Fatal Error: MONGO_URI is not defined in .env file");
-  process.exit(1); // Stop the app if there is no DB connection string
+// Create the Express application instance
+const app = express();
+
+// Parse incoming JSON bodies and put the result into req.body
+app.use(express.json());
+
+// Enable CORS for the client origin (or allow all origins if CLIENT_URL is not set)
+app.use(cors({ origin: process.env.CLIENT_URL || "*" }));
+
+// Simple health endpoint: verifies the server is up
+app.get("/health", (req, res) => res.json({ ok: true }));
+
+// Database status endpoint: returns Mongoose connection state
+app.get("/db-status", (req, res) => {
+  res.json({
+    mongooseState: mongoose.connection.readyState,
+  });
+});
+
+// Mount the user routes under /users
+app.use("/users", userRoutes);
+
+// Fired when Mongoose successfully connects to MongoDB
+mongoose.connection.on("connected", () =>
+  console.log("🟢 mongoose connected (event)")
+);
+
+// Fired when Mongoose disconnects from MongoDB
+mongoose.connection.on("disconnected", () =>
+  console.log("🟠 mongoose disconnected (event)")
+);
+
+// Fired when Mongoose encounters a connection-level error
+mongoose.connection.on("error", (e) =>
+  console.log("🔴 mongoose error (event):", e.message)
+);
+
+/* =========================
+   Server Startup
+   ========================= */
+
+const PORT = process.env.PORT || 5000;
+
+// Main startup function: connect to MongoDB first, then start the HTTP server
+async function startServer() {
+  // Read MongoDB connection string from environment variables
+  const mongoURI = process.env.MONGODB_URI;
+
+  // Fail fast if the MongoDB URI is missing 
+  if (!mongoURI) {
+    console.error("❌ Fatal Error: MONGODB_URI is not defined in .env file");
+    process.exit(1); // Exit with error code
+  }
+
+  try {
+    // Disable mongoose buffering to fail fast if not connected
+    mongoose.set("bufferCommands", false);
+
+    // Connect to MongoDB
+    // Timeouts:
+    // - serverSelectionTimeoutMS: how long to wait for a MongoDB server to be selected
+    // - connectTimeoutMS: how long to wait for initial connection
+    // - socketTimeoutMS: how long to wait for inactivity on the socket
+    await mongoose.connect(mongoURI, {
+      serverSelectionTimeoutMS: 30000,
+      connectTimeoutMS: 30000,
+      socketTimeoutMS: 30000,
+    });
+
+    // the DB connection succeeded
+    console.log("✅ MongoDB connected successfully");
+
+    // Start listening for HTTP requests only AFTER DB is connected
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is running on port ${PORT}`);
+    });
+  } catch (err) {
+    // If DB connection fails, log the error and exit
+    console.error("❌ MongoDB connection error:", err.message);
+    process.exit(1);
+  }
 }
 
-mongoose.connect(mongoURI)
-  .then(() => console.log('✅ MongoDB connected successfully'))
-  .catch(err => console.error('❌ MongoDB connection error:', err));
-
-// 2. Setup __dirname for ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const app = express();
-console.log('Starting server...');
-
-// 3. Middleware
-app.use(express.json());
-app.use(cors({
-  origin: process.env.CLIENT_URL || '*'
-}));
-app.use('/images', express.static(path.join(__dirname, 'images'))); // Serve static images
-
-// 4. Database Connection
-// mongoose.connect("mongodb+srv://miryammazor62_db_user:ZleeIUeIIZTEJ8mL@hackathon_2025_QB.rnzftqh.mongodb.net/", {})//לשנות
-//   .then(() => console.log('✅ MongoDB connected successfully'))
-//   .catch(err => console.error('❌ MongoDB connection error:', err));
-
-// 5. Routes
-// I kept your Ducks routes as requested
-app.use('/ducks', rubberDuckRoutes);
-app.use('/users', userRoutes);
-
-// 6. Start Server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+startServer();
