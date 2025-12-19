@@ -1,0 +1,26 @@
+.saveBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  animation: slideUp 0.3s ease-out;
+}
+
+.saveMessage {
+  color: #374151;
+  font-weight: 500;
+  margin: 0;
+}
+
+.saveActions {
+  display: flex;
+  gap: 12px;
+}
+

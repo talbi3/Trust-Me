@@ -1,18 +1,18 @@
 import { useContext } from 'react';
 import styles from './RandomDuck.module.css';
 import { DuckContext } from '../../context/DuckContext';
-import Button from '../common/Button/Button.jsx';
+import FirstButton from '../common/Button/Button.jsx';
 
 const apiUrl = import.meta.env.VITE_SERVER_API_URL;
 
 const RandomDuck = () => {
   const { duck, getRandomDuck } = useContext(DuckContext);
- 
+
   if (!duck) return null;
 
   return (
     <div className={styles.container}>
-      <Button onClick={getRandomDuck}>Show Random Duck</Button>
+      <FirstButton onClick={getRandomDuck}>Show Random Duck</FirstButton>
       {
         <div className={styles.duck}>
           <h2 className={styles.duckName}>{duck.name}</h2>

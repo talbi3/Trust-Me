@@ -7,7 +7,6 @@
   min-height: 50px;
 }
 
-/* מבטל את הקו התחתון לשורה האחרונה */
 .container:last-child {
   border-bottom: none;
 }

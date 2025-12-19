@@ -1,10 +1,10 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import api from '../services/api';
 
 const SettingsContext = createContext();
 
-export const SettingsProvider = ({ children }) => {
+const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState({
     notifications: { email: false, push: false },
     connectors: [],
@@ -126,10 +126,5 @@ SettingsProvider.propTypes = {
   children: PropTypes.node.isRequired
 };
 
-export const useSettings = () => {
-  const context = useContext(SettingsContext);
-  if (!context) {
-    throw new Error('useSettings must be used within a SettingsProvider');
-  }
-  return context;
-};
+export { SettingsContext, SettingsProvider };
+

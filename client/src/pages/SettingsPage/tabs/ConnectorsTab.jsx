@@ -2,7 +2,7 @@ import { SiYoutube, SiTelegram, SiWhatsapp, SiDiscord } from 'react-icons/si';
 import Button from '../../../components/common/Button/Button.jsx';
 import SettingsRow from '../../../components/SettingsRow/SettingsRow.jsx';
 import layout from './SettingsLayout.module.css';
-import { useSettings } from '../../../context/SettingsContext.jsx';
+import { useSettings } from  '../../../hooks/useSettings.js';
 
 const APP_CONFIG = {
   whatsapp: { icon: <SiWhatsapp />, color: '#25D366', desc: 'Analyze group chats' },

@@ -1,7 +1,7 @@
 import ToggleSwitch from '../../../components/common/ToggleSwitch/ToggleSwitch.jsx';
 import SettingsRow from '../../../components/SettingsRow/SettingsRow.jsx'; 
 import layout from './SettingsLayout.module.css'; 
-import { useSettings } from '../../../context/SettingsContext.jsx'; 
+import { useSettings } from  '../../../hooks/useSettings.js';
 
 const NotificationsTab = () => {
   const { notifications, toggleNotification } = useSettings();
