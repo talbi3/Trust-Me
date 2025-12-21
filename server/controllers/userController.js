@@ -1,49 +1,170 @@
+import User from '../data/user.js';
 
-// GET /api/user/profile => returns a hardcoded user object with name, date of birth, etc.
-export const getUserProfile = (req, res) => {
-  // Mocked user profile (server-side mock)
-  res.json({
-    name: "Maya",
-    dateOfBirth: "2001-06-15",
-    profilePictureUrl:
-      "https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&h=200&fit=crop",
-  });
+/**
+ * GET /api/user/profile
+ */
+const getUserProfile = async (req, res) => {
+    try {
+        const { email } = req.query;
+
+        if (!email) {
+            return res.status(400).json({ error: "Email query param is required." });
+        }
+
+        const user = await User.findOne({ email }).lean();
+        
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        res.status(200).json({
+            name: user.name,
+            email: user.email,
+            profilePictureUrl: user.profilePictureUrl,
+            dateOfBirth: user.dateOfBirth
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 };
 
-// PUT /api/user/profile => receives data, logs it, and returns { success: true }
-export const updateUserProfile = (req, res) => {
-  const updatedProfile = req.body;
+/**
+ * PUT /api/user/profile
+ */
+/**
+ * PUT /api/user/profile
+ * Expects multipart/form-data
+ */
+/**
+ * PUT /api/user/profile
+ * Expects JSON with email, name, dateOfBirth, and optionally profilePictureUrl
+ */
+const updateUserProfile = async (req, res) => {
+    try {
+        // 1. התיקון: מוסיפים את profilePictureUrl לחילוץ מה-body
+        const { email, name, dateOfBirth, profilePictureUrl } = req.body;
 
-  console.log("Received profile update:", updatedProfile);
+        if (!email) {
+            return res.status(400).json({ error: "Email is required to identify the user." });
+        }
 
-  // Mock success response
-  res.json({ success: true });
+        let updateData = { 
+            name, 
+            dateOfBirth 
+        };
+        
+        if (profilePictureUrl) {
+            updateData.profilePictureUrl = profilePictureUrl;
+        }
+
+
+        const updatedUser = await User.findOneAndUpdate(
+            { email: email }, 
+            updateData, 
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.status(200).json({ user: updatedUser });
+
+    } catch (error) {
+        console.error("Update Error:", error);
+        res.status(500).json({ error: error.message });
+    }
 };
 
-// GET /api/user/settings => returns a hardcoded settings object
-export const getUserSettings = (req, res) => {
-  // Mocked user settings (server-side mock)
-  res.json({
-  "notifications": {
-    "email": true,
-    "push": false
-  },
-  "connectors": [
-    { "id": "whatsapp", "name": "WhatsApp", "connected": true },
-    { "id": "telegram", "name": "Telegram", "connected": false },
-    { "id": "youtube", "name": "YouTube", "connected": true },
-    { "id": "discord", "name": "Discord", "connected": false }
-  ]
-});
+/**
+ * GET /api/user/settings
+ */
+const getUserSettings = async (req, res) => {
+    try {
+        // 1. Extract email from Query Parameters
+        const { email } = req.query;
+
+        if (!email) {
+            return res.status(400).json({ error: "Email query param is required." });
+        }
+
+        const user = await User.findOne({ email }).select('settings').lean();
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found." });
+        }
+
+        res.status(200).json(user.settings);
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+/**
+ * PUT /api/user/settings
+ */
+const updateUserSettings = async (req, res) => {
+        try {
+        const { email, ...settingsData } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ error: "Email is required in body to identify user." });
+        }
+
+        const updatedUser = await User.findOneAndUpdate(
+            { email: email },
+            { $set: { settings: settingsData } }, 
+            { new: true, runValidators: true } 
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ error: "User not found." });
+        }
+
+        res.status(200).json({ success: true, settings: updatedUser.settings });
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 };
 
 
-// PUT /api/user/settings => accepts updated settings
-export const updateUserSettings = (req, res) => {
-  const updatedSettings = req.body;
+/**
+ * DELETE /api/user
+ */
+const deleteUser = async (req, res) => {
+    const { email } = req.body; 
 
-  console.log("Received settings update:", updatedSettings);
+    if (!email) {
+        return res.status(400).json({ error: "Email is required to identify the user." });
+    }
 
-  // Mock success response
-  res.json({ success: true });
+    try {
+        const user = await User.findOneAndDelete({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ 
+            message: "User deleted successfully", 
+            user 
+        });
+        
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 };
+
+
+
+export {
+    getUserProfile,
+    updateUserProfile,
+    getUserSettings,
+    updateUserSettings,
+    deleteUser,
+};
+
+
+
+

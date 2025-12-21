@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState } from "react";
 import PropTypes from "prop-types";
 import api from "../services/api";
 
@@ -8,12 +8,14 @@ const ProfileProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // GET /api/user/profile
-  const getProfile = async () => {
+  // GET Profile
+  const getProfile = async (email) => {
+    if (!email) return;
+
     try {
       setLoading(true);
-      const response = await api.get("/api/user/profile");
-      setProfile(response.data);
+      const response = await api.get(`/api/user/profile?email=${email}`);
+      setProfile(response.data); 
     } catch (error) {
       console.error("Error fetching profile:", error);
     } finally {
@@ -21,39 +23,24 @@ const ProfileProvider = ({ children }) => {
     }
   };
 
-  // PUT /api/user/profile
-  const updateProfile = async (updatedProfile) => {
+  const updateProfile = async (updatedData) => {
+    setLoading(true);
     try {
-      const response = await api.put("/api/user/profile", updatedProfile);
-      if (response.data?.success) {
-        setProfile(updatedProfile);
+      const response = await api.put("/api/user/profile", updatedData);
+      
+      if (response.data?.user) {
+        setProfile(response.data.user); 
         return true;
       }
       return false;
+
     } catch (error) {
       console.error("Error updating profile:", error);
       return false;
+    } finally {
+      setLoading(false);
     }
   };
-
-  // POST /api/uploads/profile-picture
-  const uploadProfilePicture = async (file) => {
-    try {
-      const formData = new FormData();
-      formData.append("image", file);
-
-      // important: do NOT set Content-Type manually for multipart/form-data
-      const response = await api.post("/api/uploads/profile-picture", formData);
-      return response.data?.url || "";
-    } catch (error) {
-      console.error("Error uploading profile picture:", error);
-      return "";
-    }
-  };
-
-  useEffect(() => {
-    getProfile();
-  }, []);
 
   return (
     <ProfileContext.Provider
@@ -62,7 +49,6 @@ const ProfileProvider = ({ children }) => {
         loading,
         getProfile,
         updateProfile,
-        uploadProfilePicture, 
       }}
     >
       {children}

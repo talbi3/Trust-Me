@@ -46,4 +46,18 @@
   bottom: 0;
   text-align: center;
 }
+
+.logoutBtn {
+  background: none;
+  text-decoration: none;
+  font-size: 1.2em;
+  border: none;
+  cursor: pointer;
   
+  }
+
+.logoutBtn:hover {
+  text-decoration: underline;
+  color: #FF7D9C;  
+}
+

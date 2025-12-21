@@ -5,10 +5,10 @@ import layout from './SettingsLayout.module.css';
 import { useSettings } from  '../../../hooks/useSettings.js';
 
 const APP_CONFIG = {
-  whatsapp: { icon: <SiWhatsapp />, color: '#25D366', desc: 'Analyze group chats' },
-  telegram: { icon: <SiTelegram />, color: '#26A5E4', desc: 'Flag suspicious chats' },
-  youtube: { icon: <SiYoutube />, color: '#FF0000', desc: 'Filter content' },
-  discord: { icon: <SiDiscord />, color: '#5865F2', desc: 'Gaming safety' }
+  whatsapp: { label: 'WhatsApp', icon: <SiWhatsapp />, color: '#25D366', desc: 'Analyze group chats' },
+  telegram: { label: 'Telegram', icon: <SiTelegram />, color: '#26A5E4', desc: 'Flag suspicious chats' },
+  youtube: { label: 'YouTube', icon: <SiYoutube />, color: '#FF0000', desc: 'Filter content' },
+  discord: { label: 'Discord', icon: <SiDiscord />, color: '#5865F2', desc: 'Gaming safety' }
 };
 
 const ConnectorsTab = () => {
@@ -23,13 +23,16 @@ const ConnectorsTab = () => {
 
       {connectors.map((app) => {
         const config = APP_CONFIG[app.id];
+        
         if (!config) return null;
 
         return (
           <SettingsRow
             key={app.id}
             icon={<span style={{ color: config.color, display: 'flex' }}>{config.icon}</span>}
-            title={app.name}
+            
+            title={config.label} 
+            
             description={config.desc}
             action={
               <Button

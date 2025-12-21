@@ -1,31 +1,29 @@
-import { createContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useState, useEffect, useCallback, useContext } from 'react';
 import PropTypes from 'prop-types';
 import api from '../services/api';
+import { UserContext } from './UserContext'; 
 
 const SettingsContext = createContext();
 
 const SettingsProvider = ({ children }) => {
+  const { user } = useContext(UserContext); 
+
   const [settings, setSettings] = useState({
     notifications: { email: false, push: false },
     connectors: [],
   });
 
-  // State to store original data from server for comparison and reset functionality
   const [serverSettings, setServerSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  
-  // State to handle the visibility of the success feedback message
   const [showSuccess, setShowSuccess] = useState(false);
 
-  /**
-   * Fetches settings from the backend.
-   * Updates both local 'settings' draft and 'serverSettings' source of truth.
-   */
   const fetchSettings = useCallback(async () => {
+    if (!user?.email) return;
+
     try {
       setLoading(true);
-      const response = await api.get('/api/user/settings');
+      const response = await api.get(`/api/user/settings?email=${user.email}`);
       setSettings(response.data);
       setServerSettings(response.data);
     } catch (error) {
@@ -33,34 +31,30 @@ const SettingsProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]); 
 
   useEffect(() => {
-    queueMicrotask(() => {
+    if (user?.email) {
       fetchSettings();
-    });
-  }, [fetchSettings]);
+    }
+  }, [fetchSettings, user]);
 
-  /**
-   * Sends the local draft to the server.
-   * On success: Updates serverSettings to match draft and triggers a timed success message.
-   */
   const saveSettings = async () => {
+    if (!user?.email) return;
+
     setIsSaving(true);
     try {
-      const response = await api.put('/api/user/settings', settings);
+      const payload = {
+        email: user.email, 
+        ...settings
+      };
+
+      const response = await api.put('/api/user/settings', payload);
       
-      // Check if backend returned success
-      if (response.data.success) {
-        setServerSettings(settings); // Sync draft with server state to hide SaveBar
-        
-        // Show success feedback
+      if (response.data.success || response.status === 200) {
+        setServerSettings(settings); 
         setShowSuccess(true);
-        
-        // Auto-hide success message after 3 seconds for better UX
-        setTimeout(() => {
-          setShowSuccess(false);
-        }, 3000);
+        setTimeout(() => setShowSuccess(false), 3000);
       }
     } catch (error) {
       console.error("Failed to save settings:", error);
@@ -69,9 +63,6 @@ const SettingsProvider = ({ children }) => {
     }
   };
 
-  /**
-   * Updates local notification state only (Draft mode)
-   */
   const toggleNotification = (type) => {
     setSettings(prev => ({
       ...prev,
@@ -82,23 +73,13 @@ const SettingsProvider = ({ children }) => {
     }));
   };
 
-  /**
-   * Updates local connectors array state only (Draft mode)
-   */
   const toggleConnector = (appId, currentStatus) => {
     const updatedConnectors = settings.connectors.map(app =>
       app.id === appId ? { ...app, connected: !currentStatus } : app
     );
-    
-    setSettings(prev => ({
-      ...prev,
-      connectors: updatedConnectors
-    }));
+    setSettings(prev => ({ ...prev, connectors: updatedConnectors }));
   };
 
-  /**
-   * UI Helper: Returns true if the local draft differs from the last saved server state
-   */
   const hasChanges = JSON.stringify(settings) !== JSON.stringify(serverSettings);
 
   const value = {
@@ -106,9 +87,9 @@ const SettingsProvider = ({ children }) => {
     loading,
     isSaving,
     hasChanges,
-    showSuccess,    // Used by SettingsPage to render the success toast
+    showSuccess,
     saveSettings,
-    fetchSettings,  // Can be used as a "Reset" function
+    fetchSettings,
     connectors: settings.connectors,       
     notifications: settings.notifications, 
     toggleConnector,
@@ -127,4 +108,3 @@ SettingsProvider.propTypes = {
 };
 
 export { SettingsContext, SettingsProvider };
-
