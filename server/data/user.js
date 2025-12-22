@@ -1,11 +1,23 @@
 import mongoose from "mongoose";
+import { CONNECTOR_IDS, ConnectorSchema }  from "./connector.js";  
 
 const userSchema = new mongoose.Schema(
   {
-    googleId: { type: String, required: true, unique: true, index: true },
     email: { type: String, required: true, unique: true, index: true },
-    fullname: { type: String, required: true },
-    profilePicture: { type: String, default: "" },
+    name: { type: String, required: true },
+    profilePictureUrl: { type: String, default: "" },
+    dateOfBirth: { type: String, default: "" },
+
+    settings: {
+      notifications: {
+        email: { type: Boolean, default: false },
+        push: { type: Boolean, default: false },
+      },
+      connectors: {
+        type: [ConnectorSchema],
+        default: () => CONNECTOR_IDS.map((id) => ({ id, connected: false })),
+      },
+    },
   },
   { timestamps: true }
 );

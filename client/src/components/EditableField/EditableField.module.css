@@ -1,0 +1,36 @@
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-weight: 600;
+  color: #53474f;
+}
+
+
+ 
+.readOnlyValue {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 220, 232, 0.45);
+  border: 1px solid rgba(83, 71, 79, 0.12);
+  color: #53474f;
+  font-size: 1rem;
+  word-break: break-word;
+}
+
+
+.input {
+  border: 1px solid rgba(83, 71, 79, 0.25);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 1rem;
+  outline: none;
+}
+
+.input:focus {
+  border-color: rgba(83, 71, 79, 0.6);
+}

@@ -1,26 +1,56 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router'
-import Home from './pages/HomePage/HomePage';
+import { useContext } from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';  
+import Home from './pages/HomePage/HomePage.jsx';
 import styles from './styles/App.module.css';
+import Profile from './pages/ProfilePage/ProfilePage.jsx';
+import Settings from './pages/SettingsPage/SettingsPage.jsx';
+import Login from './pages/LoginPage/LoginPage.jsx';
+import { UserContext } from './context/UserContext.jsx';  
 
-import projectLogo from './assets/project-logo.png'
+import projectLogo from './assets/project-logo.png';
 
 function App() {
+   const { user, logout } = useContext(UserContext);
+   console.log("Current User in App:", user);
+
   return (
     <BrowserRouter>
       <div className={styles.app}>
         <header className={styles.appHeader}>
-          <img src={projectLogo} alt="Logo" className={styles.appLogo} />
+          <Link to="/">
+            <img src={projectLogo} alt="Logo" className={styles.appLogo} />
+          </Link>
+          
           <nav className={styles.appNav}>
-            <Link to="/" className={styles.appLink}>Home</Link>
+            {user ? (
+              <>
+                <Link to="/profile" className={styles.appLink}>Profile</Link>
+                <Link to="/settings" className={styles.appLink}>Settings</Link>
+                
+                <button 
+                  onClick={logout} 
+                  className={`${styles.appLink} ${styles.logoutBtn}`}
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link to="/login" className={styles.appLink}>Login</Link>
+            )}
           </nav>
         </header>
+        
         <main className={styles.main}>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/settings/*" element={user ? <Settings /> : <Login />} />
+            <Route path="/profile" element={user ? <Profile /> : <Login />} />
+            <Route path="/login" element={<Login />} />
           </Routes>
         </main>
+        
         <footer className={styles.footer}>
-          <p>&copy; 2024 My App</p>
+          <p>&copy; 2025 Trust Me Sis</p>
         </footer>
       </div>
     </BrowserRouter>

@@ -1,108 +1,170 @@
 import User from '../data/user.js';
-import Settings from "../data/settings.js"; 
 
-// inside createUser, after savedUser:
-
-
-// Get all users
-const getAllUsers = async (req, res) => {
+/**
+ * GET /api/user/profile
+ */
+const getUserProfile = async (req, res) => {
     try {
-        const users = await User.find().lean();
-        res.status(200).json({ users });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+        const { email } = req.query;
 
-// Get user by Google ID
-const getUserByGoogleId = async (req, res) => {
-    try {
-        const user = await User.findOne({ googleId: req.params.googleId });
+        if (!email) {
+            return res.status(400).json({ error: "Email query param is required." });
+        }
+
+        const user = await User.findOne({ email }).lean();
+        
         if (!user) return res.status(404).json({ message: 'User not found' });
-        res.json(user);
+
+        res.status(200).json({
+            name: user.name,
+            email: user.email,
+            profilePictureUrl: user.profilePictureUrl,
+            dateOfBirth: user.dateOfBirth
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-// Create a new user
-const createUser = async (req, res) => {
-    const { googleId, email, fullname, profilePicture } = req.body;
-
-    if (!googleId || !email || !fullname) {
-        return res.status(400).json({ error: 'googleId, email, and fullname are required.' });
-    }
-
+/**
+ * PUT /api/user/profile
+ */
+/**
+ * PUT /api/user/profile
+ * Expects multipart/form-data
+ */
+/**
+ * PUT /api/user/profile
+ * Expects JSON with email, name, dateOfBirth, and optionally profilePictureUrl
+ */
+const updateUserProfile = async (req, res) => {
     try {
-        // Prevent duplicates
-        const exists = await User.findOne({
-            $or: [{ email }, { googleId }],
-        }).lean();
+        // 1. התיקון: מוסיפים את profilePictureUrl לחילוץ מה-body
+        const { email, name, dateOfBirth, profilePictureUrl } = req.body;
 
-        if (exists) {
-            return res.status(400).json({ error: "A user with this Email or Google ID already exists." });
+        if (!email) {
+            return res.status(400).json({ error: "Email is required to identify the user." });
         }
 
-        const newUser = await User.create({
-            googleId,
-            email,
-            fullname,
-            profilePicture
-        });
-
-        await Settings.create({
-            userGoogleId: newUser.googleId,
-            // features will be set automatically to defaults (false)
-        });
-
-        res.status(201).json({ user: newUser });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-};
-
-// Delete a user
-const deleteUser = async (req, res) => {
-    const { googleId } = req.params;
-
-    try {
-        const user = await User.findOneAndDelete({ googleId });
-
-        if (!user) {
-            return res.status(404).json({ mssg: "User not found" });
+        let updateData = { 
+            name, 
+            dateOfBirth 
+        };
+        
+        if (profilePictureUrl) {
+            updateData.profilePictureUrl = profilePictureUrl;
         }
 
-        res.status(200).json({ user });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
 
-// Update a user
-const updateUser = async (req, res) => {
-    const { googleId } = req.params;
-
-    try {
-        const user = await User.findOneAndUpdate(
-            { googleId },
-            { ...req.body },
-            { new: true } // Return the updated document
+        const updatedUser = await User.findOneAndUpdate(
+            { email: email }, 
+            updateData, 
+            { new: true, runValidators: true }
         );
 
-        if (!user) {
-            return res.status(404).json({ mssg: "User not found" });
+        if (!updatedUser) {
+            return res.status(404).json({ error: "User not found" });
         }
 
-        res.status(200).json({ user });
+        res.status(200).json({ user: updatedUser });
+
+    } catch (error) {
+        console.error("Update Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+/**
+ * GET /api/user/settings
+ */
+const getUserSettings = async (req, res) => {
+    try {
+        // 1. Extract email from Query Parameters
+        const { email } = req.query;
+
+        if (!email) {
+            return res.status(400).json({ error: "Email query param is required." });
+        }
+
+        const user = await User.findOne({ email }).select('settings').lean();
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found." });
+        }
+
+        res.status(200).json(user.settings);
+
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-export {
-    getAllUsers,
-    getUserByGoogleId,
-    createUser,
-    deleteUser,
-    updateUser
+/**
+ * PUT /api/user/settings
+ */
+const updateUserSettings = async (req, res) => {
+        try {
+        const { email, ...settingsData } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ error: "Email is required in body to identify user." });
+        }
+
+        const updatedUser = await User.findOneAndUpdate(
+            { email: email },
+            { $set: { settings: settingsData } }, 
+            { new: true, runValidators: true } 
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ error: "User not found." });
+        }
+
+        res.status(200).json({ success: true, settings: updatedUser.settings });
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 };
+
+
+/**
+ * DELETE /api/user
+ */
+const deleteUser = async (req, res) => {
+    const { email } = req.body; 
+
+    if (!email) {
+        return res.status(400).json({ error: "Email is required to identify the user." });
+    }
+
+    try {
+        const user = await User.findOneAndDelete({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ 
+            message: "User deleted successfully", 
+            user 
+        });
+        
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+
+export {
+    getUserProfile,
+    updateUserProfile,
+    getUserSettings,
+    updateUserSettings,
+    deleteUser,
+};
+
+
+
+

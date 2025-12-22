@@ -1,0 +1,124 @@
+.page {
+  padding: 20px;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+ 
+.title {
+  color: #53474f;
+  font-size: 2rem;
+    margin-bottom: 20px;
+
+}
+
+.subtitle {
+  color: #666;
+  font-size: 16px;
+}
+
+.modeBadge {
+  background: #53474f;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  height: fit-content;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  position: relative;
+}
+
+.avatarSection {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+
+.hint {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.75;
+  color: #53474f;
+}
+
+.actions {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+ 
+.status {
+  font-size: 0.95rem;
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+.success {
+  background: rgba(0, 128, 0, 0.1);
+  color: rgba(0, 90, 0, 1);
+}
+
+.error {
+  background: rgba(220, 20, 60, 0.1);
+  color: rgba(150, 0, 30, 1);
+}
+
+/* responsive */
+@media (max-width: 720px) {
+  .avatarSection {
+    grid-template-columns: 1fr;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .container {
+    padding: 0 6px;
+  }
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cardTopActions {
+  position: absolute;  
+  top: 24px;   
+  right: 24px;  
+  z-index: 10;  
+}
+
+@media (max-width: 480px) {
+  .cardTopActions {
+    position: static; 
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+  }
+}
