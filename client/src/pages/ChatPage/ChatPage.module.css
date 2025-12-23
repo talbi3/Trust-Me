@@ -1,0 +1,82 @@
+/* Container Layout (Same as Profile) */
+.page {
+  padding: 20px;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+/* Header (Same as Profile) */
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  color: #53474f;
+  font-size: 2rem;
+  margin-bottom: 5px;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: #666;
+  font-size: 16px;
+  margin: 0;
+}
+
+/* Card Styling (Adapted for Chat) */
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 0; /* Removed padding for chat so input/header go full width */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  position: relative;
+  overflow: hidden; /* Keeps round corners */
+  
+  /* Chat specific: Fixed height to allow scrolling inside */
+  height: 75vh; 
+  display: flex;
+  flex-direction: column;
+}
+
+/* Chat Specific Areas */
+.chatHeader {
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+  background: #fdfdfd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chatContent {
+  flex: 1;
+  overflow-y: auto; /* Scrollable area */
+background-image: url("https://i.pinimg.com/736x/4d/95/61/4d9561ee031471b368b27075bc159a41.jpg");
+  background-repeat: repeat;
+  background-size: 400px;
+  background-attachment: local; /* Pattern moves with the messages */
+}
+
+.inputSection {
+  border-top: 1px solid #eee;
+  background: white;
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+  .container {
+    padding: 0 6px;
+  }
+  .card {
+    height: 80vh;
+  }
+}

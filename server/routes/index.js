@@ -1,6 +1,7 @@
 import express from 'express';
 import userRoutes from './user.js';
 import authRoutes from './auth.js';
+import chatRoutes from '../routes/chatRoutes.js';
 import multer from 'multer';
 import path from 'path';
  
@@ -10,6 +11,7 @@ const apiRouter = express.Router();
 
 apiRouter.use('/user', userRoutes);
 apiRouter.use('/auth', authRoutes);
+apiRouter.use('/chat', chatRoutes);
 
 
 
