@@ -9,6 +9,10 @@ import Chat from "./pages/ChatPage/ChatPage.jsx";
 import { UserContext } from './context/UserContext.jsx';  
 
 import projectLogo from './assets/project-logo.png';
+import MarsChatPage from "./components/chat/MarsChatPage";
+import ChatHistoryPage from "./pages/ChatPage/ChatHistoryPage";
+
+
 
 function App() {
    const { user, logout } = useContext(UserContext);
@@ -48,6 +52,8 @@ function App() {
             <Route path="/settings/*" element={user ? <Settings /> : <Login />} />
             <Route path="/profile" element={user ? <Profile /> : <Login />} />
             <Route path="/chat" element={user ? <Chat /> : <Login />} />
+            <Route path="/" element={<MarsChatPage />} />
+            <Route path="/history" element={<ChatHistoryPage />} />
             <Route path="/login" element={<Login />} />
           </Routes>
         </main>

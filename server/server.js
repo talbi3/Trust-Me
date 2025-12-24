@@ -8,6 +8,10 @@ import { fileURLToPath } from 'url';
 
 import apiRouter from './routes/index.js';
 import connectDB from './config/db.js';
+import chatHistoryRoutes from "./routes/chatHistoryRoutes.js";
+
+
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,6 +31,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Enable CORS for the client origin (or allow all origins if CLIENT_URL is not set)
 app.use(cors({ origin: process.env.CLIENT_URL || "*" }));
 
+// Use chat history routes for /api/chat-history
+app.use("/api/chat-history", chatHistoryRoutes);
 
 // Simple health endpoint: verifies the server is up
 app.get("/health", (req, res) => res.json({ ok: true }));

@@ -1,0 +1,136 @@
+.card {
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 105, 180, 0.22);
+  box-shadow: 0 12px 26px rgba(255, 105, 180, 0.10);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: linear-gradient(90deg, rgba(255, 209, 235, 0.65), rgba(255, 255, 255, 0.75));
+}
+
+.dayBtn {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px 6px;
+  border-radius: 12px;
+}
+
+.dayBtn:hover {
+  background: rgba(255, 105, 180, 0.08);
+}
+
+.dayTitle {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.chev {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.day {
+  font-weight: 900;
+  letter-spacing: 0.2px;
+}
+
+.count {
+  font-weight: 800;
+  opacity: 0.75;
+  font-size: 12px;
+}
+
+.deleteBtn {
+  border: 1px solid rgba(255, 0, 90, 0.25);
+  background: rgba(255, 0, 90, 0.06);
+  color: #a4002e;
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.deleteBtn:hover {
+  box-shadow: 0 10px 22px rgba(255, 0, 90, 0.12);
+}
+
+.body {
+  padding: 12px;
+}
+
+.loading,
+.empty {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 105, 180, 0.06);
+  border: 1px solid rgba(255, 105, 180, 0.18);
+  font-weight: 700;
+}
+
+.messages {
+  display: grid;
+  gap: 10px;
+}
+
+.msg {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.user {
+  background: rgba(255, 105, 180, 0.07);
+  border-color: rgba(255, 105, 180, 0.18);
+}
+
+.assistant {
+  background: rgba(110, 231, 255, 0.08);
+  border-color: rgba(110, 231, 255, 0.18);
+}
+
+.meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.role {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.time {
+  font-weight: 700;
+}
+
+.category {
+  margin-left: auto;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 105, 180, 0.10);
+  border: 1px solid rgba(255, 105, 180, 0.18);
+}
+
+.text {
+  white-space: pre-wrap;
+  line-height: 1.35;
+}

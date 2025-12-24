@@ -1,25 +1,30 @@
-import { useState } from 'react';
-import { RotateCcw } from 'lucide-react';
-import CategorySelector from '../components/chat/CategorySelector';
-import MessageList from '../components/chat/MessageList';
-import ChatInput from '../components/chat/ChatInput';
-import useSpeechRecognition from '../hooks/useSpeechRecognition';
-import { sendMessageToMars } from '../services/chatService';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { RotateCcw, History as HistoryIcon } from "lucide-react";
+import useSpeechRecognition from "../../hooks/useSpeechRecognition";
+import { sendMessageToMars } from "../../services/chatService";
 
-const USER_ID = 'Perseverance-34';
+import CategorySelector from "./CategorySelector/CategorySelector";
+import MessageList from "./MessageList/MessageList";
+import ChatInput from "./ChatInput/ChatInput";
+
+
+
+const USER_ID = "Perseverance-34";
 
 const MarsChatPage = () => {
+  const navigate = useNavigate();
+
   const [messages, setMessages] = useState([]);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
 
   // Callback for when voice recording finishes
   const handleVoiceResult = (transcript) => {
-    // Only send if we have a valid transcript
     if (transcript) {
-        handleSendMessage(transcript);
+      handleSendMessage(transcript);
     }
   };
 
@@ -27,60 +32,69 @@ const MarsChatPage = () => {
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
-    setMessages([{
-      id: Date.now(),
-      type: 'assistant',
-      content: `Hello! I'm here to help you with ${category.label.toLowerCase()}. How can I assist you today?`,
-      timestamp: new Date()
-    }]);
+    setMessages([
+      {
+        id: Date.now(),
+        type: "assistant",
+        content: `Hello! I'm here to help you with ${category.label.toLowerCase()}. How can I assist you today?`,
+        timestamp: new Date(),
+      },
+    ]);
   };
 
   const handleSendMessage = async (overrideText = null) => {
-    const textToSend = overrideText || inputValue;
-    
+    const textToSend = overrideText ?? inputValue;
+
     // Validation
     if ((!textToSend.trim() && !imagePreview) || isLoading) return;
 
     const userMessage = {
       id: Date.now(),
-      type: 'user',
+      type: "user",
       content: textToSend,
       image: imagePreview,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
+    // Optimistic UI update
+    setMessages((prev) => [...prev, userMessage]);
+    setInputValue("");
     setImagePreview(null);
     setIsLoading(true);
 
     try {
+      // IMPORTANT: include the new user message in the history you send
+      const historyToSend = [...messages, userMessage];
+
       const data = await sendMessageToMars({
         message: textToSend,
         helpOption: selectedCategory?.id,
         userId: USER_ID,
-        conversationHistory: messages, // Send context
+        conversationHistory: historyToSend,
         hasImage: !!imagePreview,
-        isVoiceMessage: !!overrideText
+        isVoiceMessage: !!overrideText,
       });
 
       const assistantMessage = {
         id: Date.now() + 1,
-        type: 'assistant',
-        content: data.response || 'Message received!',
+        type: "assistant",
+        content: data.response || "Message received!",
         actions: data.actions || [],
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error(error);
-      setMessages(prev => [...prev, {
-        id: Date.now() + 1,
-        type: 'assistant',
-        content: "I'm having trouble connecting to the network. Please try again.",
-        timestamp: new Date()
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          type: "assistant",
+          content: "I'm having trouble connecting to the network. Please try again.",
+          timestamp: new Date(),
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +103,7 @@ const MarsChatPage = () => {
   const handleReset = () => {
     setSelectedCategory(null);
     setMessages([]);
-    setInputValue('');
+    setInputValue("");
     setImagePreview(null);
   };
 
@@ -111,16 +125,37 @@ const MarsChatPage = () => {
               <p className="text-sm text-gray-500">Support Assistant</p>
             </div>
           </div>
-          <button onClick={handleReset} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-50 transition-all">
-            <RotateCcw className="w-4 h-4" />
-            <span className="text-sm font-medium hidden sm:inline">Change Topic</span>
-          </button>
+
+          {/* Right buttons */}
+          <div className="flex items-center gap-2">
+            {/* History button */}
+            <button
+              type="button"
+              onClick={() => navigate("/history")}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-50 transition-all"
+              title="Chat History"
+            >
+              <HistoryIcon className="w-4 h-4" />
+              <span className="text-sm font-medium hidden sm:inline">History</span>
+            </button>
+
+            {/* Change topic */}
+            <button
+              type="button"
+              onClick={handleReset}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-50 transition-all"
+              title="Change Topic"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span className="text-sm font-medium hidden sm:inline">Change Topic</span>
+            </button>
+          </div>
         </div>
       </div>
 
       <MessageList messages={messages} isLoading={isLoading} />
 
-      <ChatInput 
+      <ChatInput
         inputValue={inputValue}
         setInputValue={setInputValue}
         onSendMessage={() => handleSendMessage()}
