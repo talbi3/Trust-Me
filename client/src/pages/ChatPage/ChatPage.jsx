@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { RotateCcw, History as HistoryIcon } from "lucide-react";
+import { RotateCcw, History as HistoryIcon, Sparkles } from "lucide-react";
 import styles from "../ChatPage/ChatPage.module.css";
 
 // Components
@@ -16,6 +16,30 @@ import { saveChatMessage, seedDemoHistory } from "../../services/chatHistoryLoca
 
 const USER_ID = "Perseverance-34";
 
+/**
+ * Features per topic (categoryId).
+ * IMPORTANT: categoryId must match CategorySelector ids.
+ * If your ids are "picture"/"bullying"/"focus" - change the keys accordingly.
+ */
+function getFeaturesForCategory(categoryId) {
+  const FEATURES_BY_CATEGORY = {
+    Pictures: [
+      { key: "A", label: "FEATURE A", message: "APPLY FEATURE A" },
+      { key: "B", label: "FEATURE B", message: "APPLY FEATURE B" },
+    ],
+    Bullying: [
+      { key: "C", label: "FEATURE C", message: "APPLY FEATURE C" },
+      { key: "B", label: "FEATURE B", message: "APPLY FEATURE B" },
+    ],
+    Focus: [
+      { key: "D", label: "FEATURE D", message: "APPLY FEATURE D" },
+      { key: "C", label: "FEATURE C", message: "APPLY FEATURE C" },
+    ],
+  };
+
+  return FEATURES_BY_CATEGORY[categoryId] || [];
+}
+
 export default function ChatPage() {
   const navigate = useNavigate();
 
@@ -25,14 +49,35 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
 
+  // Features dropdown state
+  const [featuresOpen, setFeaturesOpen] = useState(false);
+  const featuresRef = useRef(null);
+
+  const features = getFeaturesForCategory(selectedCategory?.id);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function onDocMouseDown(e) {
+      if (!featuresRef.current) return;
+      if (!featuresRef.current.contains(e.target)) {
+        setFeaturesOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onDocMouseDown);
+    return () => document.removeEventListener("mousedown", onDocMouseDown);
+  }, []);
+
+  /* ---------------- Voice ---------------- */
   const handleVoiceResult = (transcript) => {
     if (transcript) handleSendMessage(transcript);
   };
 
   const { isListening, toggleListening } = useSpeechRecognition(handleVoiceResult);
 
+  /* ---------------- Category ---------------- */
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
+    setFeaturesOpen(false);
 
     const helloMsg = {
       id: Date.now(),
@@ -43,7 +88,6 @@ export default function ChatPage() {
 
     setMessages([helloMsg]);
 
-    // Save to demo history
     saveChatMessage({
       userId: USER_ID,
       type: "assistant",
@@ -53,6 +97,7 @@ export default function ChatPage() {
     });
   };
 
+  /* ---------------- Send Message ---------------- */
   const handleSendMessage = async (overrideText = null) => {
     const textToSend = overrideText || inputValue;
     if ((!textToSend.trim() && !imagePreview) || isLoading) return;
@@ -65,13 +110,11 @@ export default function ChatPage() {
       timestamp: new Date(),
     };
 
-    // UI update
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setImagePreview(null);
     setIsLoading(true);
 
-    // Save to demo history (user message)
     saveChatMessage({
       userId: USER_ID,
       type: "user",
@@ -81,7 +124,6 @@ export default function ChatPage() {
     });
 
     try {
-      // include the new message in conversationHistory sent to server
       const historyToSend = [...messages, userMessage];
 
       const data = await sendMessageToMars({
@@ -103,7 +145,6 @@ export default function ChatPage() {
 
       setMessages((prev) => [...prev, assistantMessage]);
 
-      // Save to demo history (assistant message)
       saveChatMessage({
         userId: USER_ID,
         type: "assistant",
@@ -123,7 +164,6 @@ export default function ChatPage() {
 
       setMessages((prev) => [...prev, fallback]);
 
-      // Save error message to demo history so you can see it in History
       saveChatMessage({
         userId: USER_ID,
         type: "assistant",
@@ -136,14 +176,22 @@ export default function ChatPage() {
     }
   };
 
+  /* ---------------- Feature Apply ---------------- */
+  const handleApplyFeature = (featureText) => {
+    setFeaturesOpen(false);
+    handleSendMessage(featureText);
+  };
+
+  /* ---------------- Reset ---------------- */
   const handleReset = () => {
     setSelectedCategory(null);
     setMessages([]);
     setInputValue("");
     setImagePreview(null);
+    setFeaturesOpen(false);
   };
 
-  // If no category selected
+  /* ---------------- No Category Selected ---------------- */
   if (!selectedCategory) {
     return (
       <div className={styles.page}>
@@ -154,22 +202,20 @@ export default function ChatPage() {
               <p className={styles.subtitle}>Select a topic to start</p>
             </div>
 
-            {/* Optional: quick demo seed button for testing */}
-            <div style={{ display: "flex", gap: 10 }}>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  seedDemoHistory(USER_ID);
-                  navigate("/history");
-                }}
-                style={{ fontSize: "0.85rem", padding: "6px 12px" }}
-              >
-                <HistoryIcon size={14} style={{ marginRight: 6 }} /> Load Demo &amp; Open History
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              onClick={() => {
+                seedDemoHistory(USER_ID);
+                navigate("/history");
+              }}
+              style={{ fontSize: "0.85rem", padding: "6px 12px" }}
+            >
+              <HistoryIcon size={14} style={{ marginRight: 6 }} />
+              Load Demo &amp; History
+            </Button>
           </div>
 
-          <div className={styles.card} style={{ height: "auto", minHeight: "60vh", padding: "20px" }}>
+          <div className={styles.card} style={{ minHeight: "60vh", padding: 20 }}>
             <CategorySelector onSelectCategory={handleCategorySelect} userId={USER_ID} />
           </div>
         </div>
@@ -177,11 +223,10 @@ export default function ChatPage() {
     );
   }
 
-  // Chat UI
+  /* ---------------- Chat UI ---------------- */
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        {/* Header Row */}
         <div className={styles.headerRow}>
           <div>
             <h1 className={styles.title}>Mars Chat</h1>
@@ -192,39 +237,62 @@ export default function ChatPage() {
         </div>
 
         <div className={styles.card}>
-          {/* Card Internal Header */}
+          {/* Header */}
           <div className={styles.chatHeader}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div style={{ display: "flex", gap: 10 }}>
               <span style={{ fontSize: "1.5rem" }}>{selectedCategory.icon}</span>
-              <span style={{ fontWeight: 500, color: "#333" }}>Assistant</span>
+              <span>Assistant</span>
             </div>
 
-            {/* Actions: History + Change Topic */}
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <Button
-                variant="outline"
-                onClick={() => navigate("/history")}
-                style={{ fontSize: "0.85rem", padding: "6px 12px" }}
-              >
-                <HistoryIcon size={14} style={{ marginRight: 6 }} /> History
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              <Button variant="outline" onClick={() => navigate("/history")}>
+                <HistoryIcon size={14} /> History
               </Button>
 
-              <Button
-                variant="outline"
-                onClick={handleReset}
-                style={{ fontSize: "0.85rem", padding: "6px 12px" }}
-              >
-                <RotateCcw size={14} style={{ marginRight: 6 }} /> Change Topic
+              {/* Features dropdown */}
+              <div className={styles.featuresWrap} ref={featuresRef}>
+                <Button
+                  variant="outline"
+                  onClick={() => setFeaturesOpen((v) => !v)}
+                  disabled={!features?.length}
+                >
+                  <Sparkles size={14} /> Features
+                </Button>
+
+                {featuresOpen && (
+                  <div className={styles.featuresMenu} role="menu" aria-label="Features menu">
+                    <div className={styles.featuresMenuTitle}>
+                      Topic: {selectedCategory?.label}
+                    </div>
+
+                    {features.map((f) => (
+                      <button
+                        key={f.key}
+                        type="button"
+                        className={styles.featuresItem}
+                        onClick={() => handleApplyFeature(f.message)}
+                        disabled={isLoading}
+                        role="menuitem"
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Button variant="outline" onClick={handleReset}>
+                <RotateCcw size={14} /> Change Topic
               </Button>
             </div>
           </div>
 
-          {/* Scrollable Content */}
+          {/* Messages */}
           <div className={styles.chatContent}>
             <MessageList messages={messages} isLoading={isLoading} />
           </div>
 
-          {/* Input Area */}
+          {/* Input */}
           <div className={styles.inputSection}>
             <ChatInput
               inputValue={inputValue}

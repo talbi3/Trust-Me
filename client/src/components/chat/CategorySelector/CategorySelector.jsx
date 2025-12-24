@@ -3,9 +3,9 @@ import { Sparkles } from 'lucide-react';
 import styles from './CategorySelector.module.css';
 
 const CATEGORIES = [
-  { id: 'bullying', label: 'Bullying Support', icon: '🛡️' },
-  { id: 'pictures', label: 'Picture Safety', icon: '📸' },
-  { id: 'focus', label: 'Focus Help', icon: '🎯' }
+  { id: 'Bullying', label: 'Bullying Support', icon: '🛡️' },
+  { id: 'Pictures', label: 'Picture Safety', icon: '📸' },
+  { id: 'Focus', label: 'Focus Help', icon: '🎯' }
 ];
 
 const CategorySelector = ({ onSelectCategory, userId }) => {
