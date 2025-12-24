@@ -1,33 +1,19 @@
 import PropTypes from "prop-types";
 import styles from "./FeaturePanel.module.css";
-
-function getFeaturesForCategory(categoryId) {
-  const FEATURES_BY_CATEGORY = {
-    Pictures: [
-      { key: "A", label: "FEATURE A", message: "APPLY FEATURE A" },
-      { key: "B", label: "FEATURE B", message: "APPLY FEATURE B" },
-    ],
-    bullying: [
-      { key: "C", label: "FEATURE C", message: "APPLY FEATURE C" },
-      { key: "B", label: "FEATURE B", message: "APPLY FEATURE B" },
-    ],
-    Focus: [
-      { key: "D", label: "FEATURE D", message: "APPLY FEATURE D" },
-      { key: "C", label: "FEATURE C", message: "APPLY FEATURE C" },
-    ],
-  };
-
-  return FEATURES_BY_CATEGORY[categoryId] || [];
-}
+// 1. Import the single source of truth we created earlier
+import { FEATURES_BY_CATEGORY } from "../../../constants/chatFeatures"; 
 
 export default function FeaturePanel({ categoryId, onApplyFeature, disabled }) {
-  const features = getFeaturesForCategory(categoryId);
+  // 2. Use the imported data instead of hardcoding it here
+  // We use categoryId directly. If categoryId is "Bullying", it looks for "Bullying" in the file.
+  const features = categoryId ? FEATURES_BY_CATEGORY[categoryId] : [];
 
-  if (features.length === 0) return null;
+  // If no features found (or no category selected), don't show anything
+  if (!features || features.length === 0) return null;
 
   return (
     <aside className={styles.panel}>
-      <div className={styles.title}>Features</div>
+      <div className={styles.title}>Suggested Ideas</div>
 
       <div className={styles.list}>
         {features.map((f) => (

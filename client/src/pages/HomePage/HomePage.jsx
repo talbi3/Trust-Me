@@ -1,17 +1,46 @@
+import { useNavigate } from "react-router-dom";
+import WelcomeMessage from '../../components/chat/WelcomeMessage/WelcomeMessage';
 import styles from './Home.module.css';
 
-
 const Home = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className={styles.home}>
-      <h1 className={styles.headline}> Welcome to Trust Me Sis</h1>
-      <p className={styles.description}>
-        Your go-to platform for managing profiles, settings, and exploring exciting features.
-      </p>
-        <p className={styles.description}>
-        Navigate through the app using the links above to get started!
-      </p>
+    <div className={styles.container}>
+      <div className={styles.card}>
+        {/* Header Section */}
+        <div className={styles.header}>
        
+        </div>
+
+        {/* Dynamic Welcome Message */}
+        <div className={styles.messageWrapper}>
+          <WelcomeMessage />
+        </div>
+
+        {/* Description */}
+        <p className={styles.description}>
+          Your go-to platform for safety guidance. Manage your profile, 
+          explore features, and chat with our assistant anytime.
+        </p>
+
+        {/* Action Buttons */}
+        <div className={styles.buttonGroup}>
+          <button 
+            className={styles.primaryButton}
+            onClick={() => navigate('/login')}
+          >
+            Log In
+          </button>
+          
+          <button 
+            className={styles.secondaryButton}
+            onClick={() => navigate('/chat')}
+          >
+            Go to Chat
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

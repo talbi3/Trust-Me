@@ -1,11 +1,11 @@
-import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';  
 import { Sparkles } from 'lucide-react';
 import styles from './CategorySelector.module.css';
 
 const CATEGORIES = [
-  { id: 'Bullying', label: 'Bullying Support', icon: '🛡️' },
-  { id: 'Pictures', label: 'Picture Safety', icon: '📸' },
-  { id: 'Focus', label: 'Focus Help', icon: '🎯' }
+  { id: 'Bullying', label: 'Bullying Support', icon: '🛡️' }, // Capital B
+  { id: 'Pictures', label: 'Picture Safety', icon: '📸' },    // Capital P
+  { id: 'Focus', label: 'Focus Help', icon: '🎯' }            // Capital F
 ];
 
 const CategorySelector = ({ onSelectCategory, userId }) => {

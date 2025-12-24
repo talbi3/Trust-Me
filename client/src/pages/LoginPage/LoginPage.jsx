@@ -25,7 +25,7 @@ export default function LoginPage() {
     const result = await login(emailToLogin);
 
     if (result.success) {
-      navigate("/profile"); 
+      navigate("/chat"); 
     } else {
       setError(result.message); 
     }

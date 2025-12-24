@@ -1,137 +1,357 @@
-/* Container Layout (Same as Profile) */
+
 .page {
-  padding: 20px;
+  padding: 24px;
   min-height: 100vh;
+  background: linear-gradient(135deg, #fff5f7 0%, #ffe8ef 100%);
   box-sizing: border-box;
 }
-.chatBodyRow {
-  display: flex;
-  min-height: 0;
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  text-align: left;
 }
 
+/* Header Section */
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.title {
+  color: #1a1a2e;
+  font-size: 2.25rem;
+  margin: 0 0 8px 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  color: #64748b;
+  font-size: 15px;
+  margin: 0;
+  font-weight: 500;
+}
+
+.subtitle strong {
+  color: #475569;
+  font-weight: 600;
+}
+
+/* Main Card Container */
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 0;
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 10px 40px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  height: 75vh;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* Chat Header */
+.chatHeader {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  min-height: 76px;
+}
+
+.chatHeader > div:first-child {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.chatHeader > div:first-child span:first-child {
+  font-size: 1.75rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.chatHeader > div:first-child span:last-child {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #334155;
+  letter-spacing: -0.01em;
+}
+
+.chatHeader > div:last-child {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Chat Content Area */
 .chatContent {
   flex: 1;
-  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-image: url("https://i.pinimg.com/736x/4d/95/61/4d9561ee031471b368b27075bc159a41.jpg");
+  background-repeat: repeat;
+  background-size: 400px;
+  background-attachment: local;
+  position: relative;
 }
+
+.chatContent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, 
+    rgba(255, 255, 255, 0.5) 0%, 
+    rgba(255, 255, 255, 0.3) 100%
+  );
+  pointer-events: none;
+}
+
+/* Custom Scrollbar */
+.chatContent::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chatContent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chatContent::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.chatContent::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* Input Section */
+.inputSection {
+  border-top: 1px solid #f1f5f9;
+  background: white;
+  padding: 0;
+}
+
+/* Features Dropdown */
 .featuresWrap {
   position: relative;
   display: inline-block;
 }
 
-.featuresMenu {
+.featuresMenuContainer {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 10px);
   right: 0;
-  width: 240px;
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 14px;
-  padding: 10px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
-  z-index: 50;
+  z-index: 100;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.featuresMenu {
+  width: 280px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.08),
+    0 20px 40px -12px rgba(0, 0, 0, 0.15);
 }
 
 .featuresMenuTitle {
   font-size: 12px;
-  color: #666;
-  padding: 4px 6px 10px 6px;
-  border-bottom: 1px solid #f1f1f1;
-  margin-bottom: 8px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 8px 12px 12px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 10px;
 }
 
 .featuresItem {
   width: 100%;
   text-align: left;
-  padding: 10px 10px;
-  border: 1px solid #eee;
-  background: #fafafa;
-  border-radius: 10px;
-  font-weight: 600;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 14px;
+  color: #334155;
   cursor: pointer;
   margin-bottom: 8px;
+  transition: all 0.2s ease;
+  line-height: 1.4;
 }
 
-.featuresItem:hover {
-  background: #f2f2f2;
+.featuresItem:last-child {
+  margin-bottom: 0;
+}
+
+.featuresItem:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.featuresItem:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .featuresItem:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  background: #f8fafc;
 }
 
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  text-align: left;
-}
-
-/* Header (Same as Profile) */
-.headerRow {
+/* Chat Body Row (for potential sidebar) */
+.chatBodyRow {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+  min-height: 0;
+  gap: 20px;
 }
 
-.title {
-  color: #53474f;
-  font-size: 2rem;
-  margin-bottom: 5px;
-  font-weight: 700;
-}
-
-.subtitle {
-  color: #666;
-  font-size: 16px;
-  margin: 0;
-}
-
-/* Card Styling (Adapted for Chat) */
-.card {
-  background: white;
-  border-radius: 16px;
-  padding: 0; /* Removed padding for chat so input/header go full width */
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-  position: relative;
-  overflow: hidden; /* Keeps round corners */
-  
-  /* Chat specific: Fixed height to allow scrolling inside */
-  height: 75vh; 
-  display: flex;
-  flex-direction: column;
-}
-
-/* Chat Specific Areas */
-.chatHeader {
-  padding: 16px 20px;
-  border-bottom: 1px solid #eee;
-  background: #fdfdfd;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.chatContent {
-  flex: 1;
-  overflow-y: auto; /* Scrollable area */
-background-image: url("https://i.pinimg.com/736x/4d/95/61/4d9561ee031471b368b27075bc159a41.jpg");
-  background-repeat: repeat;
-  background-size: 400px;
-  background-attachment: local; /* Pattern moves with the messages */
-}
-
-.inputSection {
-  border-top: 1px solid #eee;
-  background: white;
-}
-
-/* Responsive */
-@media (max-width: 720px) {
-  .container {
-    padding: 0 6px;
+/* Responsive Design */
+@media (max-width: 768px) {
+  .page {
+    padding: 16px;
   }
+
+  .container {
+    padding: 0;
+  }
+
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
   .card {
-    height: 80vh;
+    height: 82vh;
+    border-radius: 16px;
+  }
+
+  .chatHeader {
+    padding: 16px 18px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .chatHeader > div:first-child {
+    gap: 10px;
+  }
+
+  .chatHeader > div:first-child span:first-child {
+    font-size: 1.5rem;
+  }
+
+  .chatHeader > div:first-child span:last-child {
+    font-size: 1rem;
+  }
+
+  .chatHeader > div:last-child {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .featuresMenuContainer {
+    right: auto;
+    left: 0;
+  }
+
+  .featuresMenu {
+    width: 260px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 12px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .card {
+    height: 85vh;
+    border-radius: 14px;
+  }
+
+  .chatHeader {
+    padding: 14px 16px;
+  }
+
+  .featuresMenu {
+    width: 240px;
+  }
+
+  .featuresItem {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .featuresMenuContainer {
+    animation: none;
+  }
+
+  .featuresItem {
+    transition: none;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .page {
+    background: white;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+
+  .chatHeader > div:last-child {
+    display: none;
   }
 }
