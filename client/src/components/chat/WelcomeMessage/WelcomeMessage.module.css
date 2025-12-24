@@ -1,0 +1,42 @@
+.container {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 24px;
+  background: #f8f9fa;
+  border-radius: 16px;
+  border: 1px dashed #cbd5e1;
+}
+
+.iconWrapper {
+  width: 56px;
+  height: 56px;
+  background: #e0f2fe;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.icon {
+  color: #0284c7;
+  width: 28px;
+  height: 28px;
+}
+
+.title {
+  font-size: 1.5rem;
+  color: #334155;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.text {
+  color: #64748b;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.text strong {
+  color: #475569;
+}
