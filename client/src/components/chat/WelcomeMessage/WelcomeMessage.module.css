@@ -1,0 +1,251 @@
+/* Welcome Message Container */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 40px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Animated Icon Wrapper */
+.iconWrapper {
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+  box-shadow: 
+    0 8px 24px rgba(255, 107, 157, 0.3),
+    0 4px 12px rgba(196, 69, 105, 0.2);
+  animation: float 3.5s ease-in-out infinite;
+  position: relative;
+}
+
+.iconWrapper::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+  border-radius: 50%;
+  opacity: 0.2;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px) scale(1);
+  }
+  50% { 
+    transform: translateY(-12px) scale(1.02);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 0.2;
+  }
+  50% { 
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+.icon {
+  width: 44px;
+  height: 44px;
+  color: white;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  position: relative;
+  z-index: 1;
+}
+
+/* Title */
+.title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 16px;
+  text-align: center;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+/* Text Content */
+.text {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #475569;
+  margin-bottom: 0;
+  text-align: center;
+  max-width: 500px;
+}
+
+.text strong {
+  color: #334155;
+  font-weight: 600;
+  background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Message Box (if you need it) */
+.messageBox {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 107, 157, 0.2);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+  margin-top: 20px;
+  width: 100%;
+}
+
+/* Notice Box */
+.notice {
+  background: linear-gradient(135deg, #fff5f7 0%, #ffe8ef 100%);
+  border-left: 4px solid #ff6b9d;
+  padding: 18px 20px;
+  border-radius: 12px;
+  margin: 24px 0;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #7c2d4a;
+  box-shadow: 0 2px 8px rgba(255, 107, 157, 0.1);
+}
+
+.notice strong {
+  color: #c44569;
+  font-weight: 600;
+}
+
+/* Prompt Text */
+.prompt {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #334155;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Login Section */
+.login {
+  text-align: center;
+  padding: 18px 24px;
+  background: rgba(248, 250, 252, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  color: #64748b;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+/* Links */
+.link {
+  color: #ff6b9d;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+}
+
+.link:hover {
+  color: #c44569;
+  border-bottom: 2px solid #ff6b9d;
+  text-decoration: none;
+}
+
+.link:active {
+  transform: translateY(1px);
+}
+
+/* Paragraph default centering */
+p {
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 40px 24px;
+  }
+  
+  .iconWrapper {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 24px;
+  }
+  
+  .icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .title {
+    font-size: 1.85rem;
+  }
+  
+  .text {
+    font-size: 1rem;
+  }
+  
+  .messageBox {
+    padding: 24px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 32px 16px;
+  }
+  
+  .iconWrapper {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 20px;
+  }
+  
+  .icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+  }
+  
+  .text {
+    font-size: 0.95rem;
+  }
+  
+  .messageBox {
+    padding: 20px 16px;
+  }
+  
+  .notice {
+    padding: 16px 18px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Accessibility - Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .iconWrapper,
+  .iconWrapper::before {
+    animation: none;
+  }
+  
+  .link {
+    transition: none;
+  }
+}

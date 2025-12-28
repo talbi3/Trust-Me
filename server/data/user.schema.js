@@ -1,12 +1,15 @@
 import mongoose from "mongoose";
-import { CONNECTOR_IDS, ConnectorSchema }  from "./connector.js";  
+import { CONNECTOR_IDS, ConnectorSchema }  from "./connector.schema.js";  
 
 const userSchema = new mongoose.Schema(
   {
     email: { type: String, required: true, unique: true, index: true },
     name: { type: String, required: true },
     profilePictureUrl: { type: String, default: "" },
-    dateOfBirth: { type: String, default: "" },
+    dateOfBirth:  {
+        type: String,  
+        required: true
+    },
 
     settings: {
       notifications: {
@@ -19,7 +22,10 @@ const userSchema = new mongoose.Schema(
       },
     },
   },
-  { timestamps: true }
+  { 
+    timestamps: true 
+  }
+
 );
 
 export default mongoose.model("User", userSchema);

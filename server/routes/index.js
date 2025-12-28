@@ -1,37 +1,17 @@
 import express from 'express';
-import userRoutes from './user.js';
-import authRoutes from './auth.js';
-import multer from 'multer';
-import path from 'path';
- 
+import userRoutes from './user.routes.js';
+import authRoutes from './auth.routes.js';
+import chatRoutes from './chat.routes.js';
+import uploadRoutes from './upload.routes.js';
+import chatHistoryRoutes  from './chatHistory.routes.js';
 
 const apiRouter = express.Router();
 
 
 apiRouter.use('/user', userRoutes);
 apiRouter.use('/auth', authRoutes);
-
-
-
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
-const upload = multer({ storage: storage });
-
-
-apiRouter.post('/uploads/profile-picture', upload.single('image'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded" });
-  }
-  const imageUrl = `/uploads/${req.file.filename}`;
-  res.json({ url: imageUrl });
-});
+apiRouter.use('/uploads', uploadRoutes);
+apiRouter.use('/chat', chatRoutes);
+apiRouter.use('/chat-history', chatHistoryRoutes);
 
 export default apiRouter;

@@ -1,0 +1,152 @@
+.container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  max-width: 85%;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.rowUser {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.rowAssistant {
+  align-self: flex-start;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  flex-shrink: 0;
+  display: none;
+}
+
+.avatarUser {
+  background-color: #333;
+  color: white;
+}
+
+.avatarAssistant {
+  background-color: #2563eb;
+  color: white;
+}
+
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.bubble {
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 15px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.bubbleUser {
+  background-color: #3e3b3b;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.bubbleAssistant {background-color: #ffffff; /* Pure White */
+  border: none; /* WhatsApp doesn't use borders */
+  color: #333;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+}
+
+.uploadedImage {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.text {
+  margin: 0;
+}
+
+.timestamp {
+  font-size: 11px;
+  color: #999;
+  margin-top: 4px;
+  padding: 0 4px;
+}
+
+/* Typing Animation */
+.typingIndicator {
+  display: flex;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.typingIndicator span {
+  width: 6px;
+  height: 6px;
+  background-color: #ccc;
+  border-radius: 50%;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.typingIndicator span:nth-child(1) { animation-delay: -0.32s; }
+.typingIndicator span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+.avatar {
+  width: 40px; /* Slightly larger for better visibility */
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* User Icon Style (e.g., Dark Gray or Blue) */
+.avatarUser {
+  background-color: #334155; /* Dark Slate */
+  color: white;
+  margin-left: 10px; /* Spacing from bubble */
+}
+
+/* Agent Icon Style (e.g., Brand Color / Green) */
+.avatarAssistant {
+  background-color: #2563eb; /* Bright Blue */
+  color: white;
+  margin-right: 10px; /* Spacing from bubble */
+}
+
+
+
+.audioWrapper {
+  margin-top: 5px; 
+  display: flex; 
+  justify-content: flex-end; 
+  opacity: 0.8;
+}

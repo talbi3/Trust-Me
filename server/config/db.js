@@ -1,13 +1,14 @@
 import mongoose from 'mongoose';
+import config from './index.js';
+import logger from '../utils/logger.js';
 
 const connectDB = async () => {
-  // Read MongoDB connection string from environment variables
-  const mongoURI = process.env.MONGODB_URI;
 
+  const mongoURI = config.db.uri;
 
   // Fail fast if the MongoDB URI is missing 
   if (!mongoURI) {
-    throw new Error("❌ Fatal Error: MONGODB_URI is not defined in .env file");
+    throw new Error("Fatal Error: MONGODB_URI is not defined in .env file");
   }
 
   try {
@@ -20,34 +21,53 @@ const connectDB = async () => {
     // - connectTimeoutMS: how long to wait for initial connection
     // - socketTimeoutMS: how long to wait for inactivity on the socket
     await mongoose.connect(mongoURI, {
+      dbName: config.db.name,
       serverSelectionTimeoutMS: 30000,
       connectTimeoutMS: 30000,
       socketTimeoutMS: 30000,
     });
 
-    // the DB connection succeeded
-    console.log("✅ MongoDB connected successfully");
+    logger.debug("MongoDB connected successfully");
 
   } catch (err) {
-    // If DB connection fails, log the error and exit
-    console.error("❌ MongoDB connection error:", err.message);
+    logger.error("MongoDB connection error:", err.message);
     throw err;
   }
 };
 
+
+const disconnectDB = async () => {
+  await mongoose.disconnect();
+};
+
+const getDBStatus = () => {
+  const statusMap = {
+    0: "disconnected",
+    1: "connected",
+    2: "connecting",
+    3: "disconnecting",
+  };
+  
+  return {
+    state: statusMap[mongoose.connection.readyState] || "unknown",
+    code: mongoose.connection.readyState
+  };
+};
+
+
 // Fired when Mongoose successfully connects to MongoDB
 mongoose.connection.on("connected", () =>
-  console.log("🟢 mongoose connected (event)")
+  logger.debug("mongoose connected")
 );
 
 // Fired when Mongoose disconnects from MongoDB
 mongoose.connection.on("disconnected", () =>
-  console.log("🟠 mongoose disconnected (event)")
+  logger.debug("mongoose disconnected")
 );
 
 // Fired when Mongoose encounters a connection-level error
 mongoose.connection.on("error", (e) =>
-  console.log("🔴 mongoose error (event):", e.message)
+  logger.error("mongoose error:", e.message)
 );
 
-export default connectDB;
+export { connectDB, getDBStatus, disconnectDB };

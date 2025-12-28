@@ -5,9 +5,14 @@ import styles from './styles/App.module.css';
 import Profile from './pages/ProfilePage/ProfilePage.jsx';
 import Settings from './pages/SettingsPage/SettingsPage.jsx';
 import Login from './pages/LoginPage/LoginPage.jsx';
+import Chat from "./pages/ChatPage/ChatPage.jsx";
 import { UserContext } from './context/UserContext.jsx';  
 
 import projectLogo from './assets/project-logo.png';
+import MarsChatPage from "./components/chat/MarsChatPage";
+import ChatHistoryPage from "./pages/ChatPage/ChatHistoryPage";
+
+
 
 function App() {
    const { user, logout } = useContext(UserContext);
@@ -26,6 +31,7 @@ function App() {
               <>
                 <Link to="/profile" className={styles.appLink}>Profile</Link>
                 <Link to="/settings" className={styles.appLink}>Settings</Link>
+                <Link to="/chat" className={styles.appLink}>Chat</Link>
                 
                 <button 
                   onClick={logout} 
@@ -45,6 +51,9 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/settings/*" element={user ? <Settings /> : <Login />} />
             <Route path="/profile" element={user ? <Profile /> : <Login />} />
+            <Route path="/chat" element={user ? <Chat /> : <Login />} />
+            <Route path="/" element={<MarsChatPage />} />
+            <Route path="/history" element={<ChatHistoryPage />} />
             <Route path="/login" element={<Login />} />
           </Routes>
         </main>

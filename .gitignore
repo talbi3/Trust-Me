@@ -130,5 +130,13 @@ dist
 .pnp.*
 
 # User uploads - ignore all files but keep the directory
-uploads/*
-!uploads/.gitkeep
+server/uploads/*
+!server/uploads/.gitkeep
+
+
+# Server logs
+server/logs/
+server/*.log
+server/logs/*.log
+server/logs/*.log.gz
+

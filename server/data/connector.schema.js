@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const CONNECTOR_IDS = ["whatsapp", "telegram", "youtube", "discord"];
+const CONNECTOR_IDS = Object.freeze(["whatsapp", "telegram", "youtube", "discord"]);
 
 const ConnectorSchema = new mongoose.Schema(
   {
