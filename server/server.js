@@ -1,30 +1,62 @@
-import 'dotenv/config';
-import express from "express";             
+import express from "express";              // Express: web framework for building HTTP APIs
+import mongoose from "mongoose";           
 import cors from "cors";                    
+import dotenv from "dotenv";     
 import path from 'path';
+import morgan from 'morgan';
 import { fileURLToPath } from 'url';
-import morganMiddleware from './middleware/morgan.middleware.js';
+
 import apiRouter from './routes/index.js';
-import {connectDB, getDBStatus} from './config/db.js';
-import config from './config/index.js';
-import logger from './utils/logger.js';
+import connectDB from './config/db.js';
+import chatHistoryRoutes from "routes/chatHistoryRoutes.js";
+
+
 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const app = express(); // Create the Express application instance
+// Load environment variables from .env into process.env
+dotenv.config();
 
-app.use(morganMiddleware); // Use Morgan middleware for logging HTTP requests
-app.use(express.json()); // Parse incoming JSON bodies and put the result into req.body
+// Create the Express application instance
+const app = express();
+app.use(morgan('dev')); // HTTP request logger
+
+// Parse incoming JSON bodies and put the result into req.body
+app.use(express.json());
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(cors({ origin: config.cors.origin || "*" })); 
 
+// Enable CORS for the client origin (or allow all origins if CLIENT_URL is not set)
+app.use(cors({ origin: process.env.CLIENT_URL || "*" }));
 
-app.get("/health", (req, res) => res.json({ ok: true })); // Simple health endpoint: verifies the server is up
-app.get("/db-status", (req, res) => { res.json({ dbStatus: getDBStatus() }); }); // Database status endpoint: returns Mongoose connection state
-app.use('/api', apiRouter); // Use the main API router for all `/api` routes
+// Use chat history routes for /api/chat-history
+app.use("/api/chat-history", chatHistoryRoutes);
 
-connectDB(); // Connect to MongoDB and start the server
+// Simple health endpoint: verifies the server is up
+app.get("/health", (req, res) => res.json({ ok: true }));
 
-app.listen(config.port, () => { logger.info(`Server is running on port ${config.port}`);}); // Start server
+// Database status endpoint: returns Mongoose connection state
+app.get("/db-status", (req, res) => {
+  res.json({
+    mongooseState: mongoose.connection.readyState,
+  });
+});
+
+// Use the main API router for all `/api` routes
+app.use('/api', apiRouter);
+
+// Connect to MongoDB and start the server only after DB is ready
+const PORT = process.env.PORT || 5000;
+
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to start server due to DB connection error:', err.message || err);
+    process.exit(1);
+  });

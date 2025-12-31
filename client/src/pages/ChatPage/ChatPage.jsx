@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { RotateCcw, History as HistoryIcon, Sparkles } from "lucide-react";
 import styles from "../ChatPage/ChatPage.module.css";
@@ -17,14 +17,36 @@ import Button from "../../components/common/Button/Button";
 import useSpeechRecognition from "../../hooks/useSpeechRecognition";
 import { sendMessageToMars } from "../../services/chatService";
 import { useProfilePage } from "../../hooks/useProfile.js";
-import { saveChatMessage, seedDemoHistory } from "../../services/chatHistoryLocal";
+import { UserContext } from "../../context/UserContext";
+import { saveMessage } from "../../services/chatHistoryApi";
 
 export default function ChatPage() {
   const navigate = useNavigate();
   const { safeProfile } = useProfilePage();
+  const { user } = useContext(UserContext);
 
-  // 1. Identify User
-  const activeUserId = safeProfile?.id || FALLBACK_USER_ID;
+  // 1. Identify User (try profile -> user context -> localStorage -> fallback)
+  function computeActiveUserId() {
+    const candidates = [];
+    if (safeProfile?.id) candidates.push(safeProfile.id);
+    if (user?.id) candidates.push(user.id);
+    if (user?._id) candidates.push(user._id);
+    try {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed?.id) candidates.push(parsed.id);
+        if (parsed?._id) candidates.push(parsed._id);
+      }
+    } catch (e) {
+      // ignore
+    }
+    if (FALLBACK_USER_ID) candidates.push(FALLBACK_USER_ID);
+
+    return [...new Set(candidates.filter(Boolean))][0] || FALLBACK_USER_ID;
+  }
+
+  const activeUserId = computeActiveUserId();
 
   // 2. State
   const [messages, setMessages] = useState([]);
@@ -75,13 +97,16 @@ export default function ChatPage() {
     setIsLoading(true);
     setFeaturesOpen(false); // Close menu if open
 
-    saveChatMessage({
-      userId: activeUserId,
+    console.log(`💬 [ChatPage] Saving user message for userId: "${activeUserId}", category: "${selectedCategory?.id || selectedCategory?.label}"`);
+    saveMessage(activeUserId, {
       type: "user",
       message: userMessage.content,
-      category: selectedCategory?.label || "",
+      category: selectedCategory?.id || selectedCategory?.label || "",
       timestamp: userMessage.timestamp,
-    });
+      hasImage: !!imagePreview,
+    })
+      .then(() => console.log(`✅ [ChatPage] User message saved`))
+      .catch((e) => console.error("❌ [ChatPage] Failed to save user message:", e));
 
     try {
       // 3. Prepare History for API
@@ -108,13 +133,15 @@ export default function ChatPage() {
 
       setMessages((prev) => [...prev, assistantMessage]);
 
-      saveChatMessage({
-        userId: activeUserId,
+      console.log(`💬 [ChatPage] Saving assistant message for userId: "${activeUserId}", category: "${selectedCategory?.id || selectedCategory?.label}"`);
+      saveMessage(activeUserId, {
         type: "assistant",
         message: assistantMessage.content,
-        category: selectedCategory?.label || "",
+        category: selectedCategory?.id || selectedCategory?.label || "",
         timestamp: assistantMessage.timestamp,
-      });
+      })
+        .then(() => console.log(`✅ [ChatPage] Assistant message saved`))
+        .catch((e) => console.error("❌ [ChatPage] Failed to save assistant message:", e));
 
     } catch (error) {
       console.error("Chat Error:", error);
@@ -155,13 +182,15 @@ export default function ChatPage() {
 
     setMessages([helloMsg]);
 
-    saveChatMessage({
-      userId: activeUserId,
+    console.log(`💬 [ChatPage] Saving greeting message for userId: "${activeUserId}", category: "${category?.label}"`);
+    saveMessage(activeUserId, {
       type: "assistant",
       message: helloMsg.content,
-      category: category?.label || "",
+      category: category?.id || category?.label || "",
       timestamp: helloMsg.timestamp,
-    });
+    })
+      .then(() => console.log(`✅ [ChatPage] Greeting message saved`))
+      .catch((e) => console.error("❌ [ChatPage] Failed to save hello message:", e));
   };
 
   // Reset/Clear Chat
@@ -190,14 +219,11 @@ export default function ChatPage() {
 
             <Button
               variant="outline"
-              onClick={() => {
-                seedDemoHistory(activeUserId);
-                navigate("/history");
-              }}
+              onClick={() => navigate("/history")}
               style={{ fontSize: "0.85rem", padding: "6px 12px" }}
             >
               <HistoryIcon size={14} style={{ marginRight: 6 }} />
-              Load Demo & History
+              Open History
             </Button>
           </div>
 
