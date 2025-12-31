@@ -135,35 +135,45 @@ export default function ChatHistoryPage() {
   }
 
   async function handleDeleteDay(day) {
-    const uid = effectiveUserId || computeEffectiveUserId();
-    if (!uid) {
-      setError("User not logged in");
-      return;
-    }
-    if (!confirm(`Delete all messages for ${day}? This cannot be undone.`)) return;
-    try {
-      setLoadingMessages(true);
-      const categoryKey = selectedCategory?.category;
-      const resp = await deleteDay(uid, day, categoryKey);
-      console.log('deleteDay response', resp);
+  const uid = effectiveUserId || computeEffectiveUserId();
+  const categoryKey = selectedCategory?.category;
 
-      // remove messages for that day+category from the current in-memory list
-      const updated = messages.filter((m) => {
-        const mDay = new Date(m.timestamp).toISOString().slice(0,10);
-        const sameDay = mDay === day;
-        const sameCategory = (m.category || '') === (categoryKey || '');
-        return !(sameDay && sameCategory);
-      });
-      setMessages(updated);
-      setDaysList(groupMessagesByDay(updated));
-      await loadCategories();
-    } catch (err) {
-      console.error('deleteDay error', err);
-      setError(err?.message || 'Failed to delete day');
-    } finally {
-      setLoadingMessages(false);
-    }
+  console.log("🧨 [HistoryPage] DeleteDay clicked", { uid, day, categoryKey });
+
+  if (!uid) {
+    setError("User not logged in");
+    return;
   }
+  if (!categoryKey) {
+    setError("No category selected. Delete Day works only inside a category.");
+    return;
+  }
+
+  if (!confirm(`Delete messages for ${day} in category "${categoryKey}"? This cannot be undone.`)) return;
+
+  try {
+    setLoadingMessages(true);
+
+    const resp = await deleteDay(uid, day, categoryKey);
+    console.log("✅ deleteDay response", resp);
+
+    const updated = messages.filter((m) => {
+      const mDay = new Date(m.timestamp).toISOString().slice(0, 10);
+      const sameDay = mDay === day;
+      const sameCategory = (m.category || "") === (categoryKey || "");
+      return !(sameDay && sameCategory);
+    });
+
+    setMessages(updated);
+    setDaysList(groupMessagesByDay(updated));
+    await loadCategories();
+  } catch (err) {
+    console.error("deleteDay error", err);
+    setError(err?.response?.data?.message || err?.message || "Failed to delete day");
+  } finally {
+    setLoadingMessages(false);
+  }
+}
 
   return (
     <div className={styles.page}>

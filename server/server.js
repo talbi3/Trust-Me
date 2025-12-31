@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 
 import apiRouter from './routes/index.js';
 import connectDB from './config/db.js';
-import chatHistoryRoutes from "./routes/chatHistoryRoutes.js";
+import chatHistoryRoutes from "routes/chatHistoryRoutes.js";
 
 
 
