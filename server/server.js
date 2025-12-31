@@ -47,11 +47,16 @@ app.get("/db-status", (req, res) => {
 // Use the main API router for all `/api` routes
 app.use('/api', apiRouter);
 
-// Connect to MongoDB and start the server
-connectDB();
+// Connect to MongoDB and start the server only after DB is ready
+const PORT = process.env.PORT || 5000;
 
-// Start server
-const PORT = process.env.PORT;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to start server due to DB connection error:', err.message || err);
+    process.exit(1);
+  });

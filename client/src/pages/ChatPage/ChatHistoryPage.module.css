@@ -85,3 +85,82 @@
   color: #a4002e;
   font-weight: 700;
 }
+
+/* Days and messages */
+.messagesList {
+  background: white;
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid #eef2f6;
+  box-shadow: 0 6px 20px rgba(16,24,40,0.06);
+}
+
+.daysOverview {
+  margin-bottom: 12px;
+}
+
+.daysList {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dayBtn {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #eef2f6;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.dayConversation {
+  margin-top: 12px;
+}
+
+.dayHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.conversationList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.messageRow {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+  background: #ffffff;
+}
+
+.msgHeader {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.msgContent {
+  color: #334155;
+  font-size: 14px;
+}
+
+.deleteMsgBtn,
+.deleteDayBtn,
+.backToDaysBtn {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background: #fff0f6;
+  color: #9f1239;
+  font-weight: 700;
+}
+
+.backToDaysBtn { background: #f8fafc; color: #475569; }
