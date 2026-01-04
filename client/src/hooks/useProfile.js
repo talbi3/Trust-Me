@@ -1,6 +1,7 @@
 import { useState, useContext, useEffect } from "react";
 import { ProfileContext } from "../context/ProfileContext";
 import { UserContext } from "../context/UserContext";
+const API_BASE = import.meta.env.VITE_SERVER_API_URL || 'http://localhost:5000';
 
 export const useProfilePage = () => {
   const { profile, loading, getProfile, updateProfile } = useContext(ProfileContext);
@@ -63,7 +64,7 @@ export const useProfilePage = () => {
       
       const fullUrl = data.url.startsWith("http") 
         ? data.url 
-        : `http://localhost:5000${data.url}`;
+        : `${API_BASE}${data.url}`;
 
       setForm((prev) => ({ ...prev, profilePictureUrl: fullUrl }));
       setStatus({ type: "success", message: "Image uploaded! Don't forget to Save." });
@@ -81,7 +82,7 @@ export const useProfilePage = () => {
     setStatus({ type: "", message: "" });
 
     const payload = {
-      email: user.email, // ✅ שימוש ב-user הנכון
+      email: user.email,  
       name: form.name.trim(),
       dateOfBirth: form.dateOfBirth,
       profilePictureUrl: form.profilePictureUrl, 

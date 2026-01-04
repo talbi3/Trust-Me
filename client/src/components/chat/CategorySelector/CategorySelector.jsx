@@ -1,11 +1,11 @@
 import PropTypes from 'prop-types';  
-import { Sparkles } from 'lucide-react';
 import styles from './CategorySelector.module.css';
+import { Sparkles, ShieldCheck, Camera, Target, ChevronRight } from 'lucide-react';
 
 const CATEGORIES = [
-  { id: 'Bullying', label: 'Bullying Support', icon: '🛡️' }, // Capital B
-  { id: 'Pictures', label: 'Picture Safety', icon: '📸' },    // Capital P
-  { id: 'Focus', label: 'Focus Help', icon: '🎯' }            // Capital F
+  { id: 'Bullying', label: 'Bullying Support', icon: ShieldCheck, color: '#53474F' }, 
+  { id: 'Pictures', label: 'Picture Safety', icon: Camera, color: '#53474F' },    
+  { id: 'Focus', label: 'Focus Help', icon: Target, color: '#53474F' }            
 ];
 
 const CategorySelector = ({ onSelectCategory, userId }) => {
@@ -20,21 +20,28 @@ const CategorySelector = ({ onSelectCategory, userId }) => {
       </div>
 
       <div className={styles.list}>
-        {CATEGORIES.map((category) => (
-          <button
-            key={category.id}
-            onClick={() => onSelectCategory(category)}
-            className={styles.card}
-          >
-            <div className={styles.cardContent}>
-              <div className={styles.cardLeft}>
-                <span className={styles.emoji}>{category.icon}</span>
-                <span className={styles.cardLabel}>{category.label}</span>
+        {CATEGORIES.map((category) => {
+          const IconComponent = category.icon;
+
+          return (
+            <button
+              key={category.id}
+              onClick={() => onSelectCategory(category)}
+              className={styles.card}
+            >
+              <div className={styles.cardContent}>
+                <div className={styles.cardLeft}>
+                  <span className={styles.emoji}>
+                    <IconComponent size={24} color={category.color} />
+                  </span>
+                  
+                  <span className={styles.cardLabel}>{category.label}</span>
+                </div>
+                <div className={styles.arrow}><ChevronRight size={20} /></div>
               </div>
-              <div className={styles.arrow}>→</div>
-            </div>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
 
       <div className={styles.footer}>

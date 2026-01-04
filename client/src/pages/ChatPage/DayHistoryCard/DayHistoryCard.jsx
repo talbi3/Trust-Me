@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { Trash2, ChevronDown, ChevronRight } from "lucide-react"; // Assuming you have lucide-react, or use text
 import styles from "./DayHistoryCard.module.css";
 
 function formatTime(ts) {
@@ -11,8 +12,8 @@ function formatTime(ts) {
 }
 
 export default function DayHistoryCard({
-  day,
-  count,
+  title, // Changed 'day' to 'title' to be more flexible (Date + Time)
+  count, // Optional now
   isOpen,
   messages,
   loadingMessages,
@@ -24,63 +25,67 @@ export default function DayHistoryCard({
       <div className={styles.header}>
         <button className={styles.dayBtn} onClick={onToggle} type="button">
           <div className={styles.dayTitle}>
-            <span className={styles.chev}>{isOpen ? "▾" : "▸"}</span>
-            <span className={styles.day}>{day}</span>
+            <span className={styles.chev}>
+                {isOpen ? <ChevronDown size={16}/> : <ChevronRight size={16}/>}
+            </span>
+            {/* Displaying the Date/Title of the chat */}
+            <span className={styles.day}>{title}</span>
           </div>
-          <span className={styles.count}>{count} msgs</span>
+          {/* Only show count if we have it, otherwise hide */}
+          {count !== undefined && <span className={styles.count}>{count} msgs</span>}
         </button>
 
-        <button className={styles.deleteBtn} onClick={onDelete} type="button">
-          Delete day
+        <button 
+            className={styles.deleteBtn} 
+            onClick={(e) => {
+                e.stopPropagation(); // Prevent toggling when clicking delete
+                onDelete();
+            }} 
+            type="button"
+            title="Delete Chat"
+        >
+          <Trash2 size={16} />
         </button>
       </div>
 
-      {isOpen ? (
+      {isOpen && (
         <div className={styles.body}>
           {loadingMessages ? (
-            <div className={styles.loading}>Loading messages…</div>
+            <div className={styles.loading}>Loading messages...</div>
           ) : messages.length === 0 ? (
-            <div className={styles.empty}>No messages for this day.</div>
+            <div className={styles.empty}>No messages in this conversation.</div>
           ) : (
             <div className={styles.messages}>
               {messages.map((m) => (
                 <div
                   key={m._id || m.id}
                   className={`${styles.msg} ${
-                    m.type === "user" ? styles.user : styles.assistant
+                    (m.role === "user" || m.type === "user") ? styles.user : styles.assistant
                   }`}
                 >
                   <div className={styles.meta}>
-                    <span className={styles.role}>{m.type}</span>
-                    <span className={styles.time}>{formatTime(m.timestamp)}</span>
-                    {m.category ? <span className={styles.category}>{m.category}</span> : null}
+                    <span className={styles.role}>
+                        {(m.role === "user" || m.type === "user") ? "You" : "Assistant"}
+                    </span>
+                    <span className={styles.time}>{formatTime(m.createdAt || m.timestamp)}</span>
                   </div>
-                  <div className={styles.text}>{m.message || m.content}</div>
+                  {/* Support both new API (content) and old API (message) */}
+                  <div className={styles.text}>{m.content || m.message}</div>
                 </div>
               ))}
             </div>
           )}
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
 
 DayHistoryCard.propTypes = {
-  day: PropTypes.string.isRequired,
-  count: PropTypes.number.isRequired,
+  title: PropTypes.string.isRequired,
+  count: PropTypes.number,
   isOpen: PropTypes.bool.isRequired,
-  messages: PropTypes.arrayOf(
-    PropTypes.shape({
-      _id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      type: PropTypes.string,
-      message: PropTypes.string,
-      content: PropTypes.string,
-      category: PropTypes.string,
-      timestamp: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-    })
-  ).isRequired,
+  messages: PropTypes.array,
   loadingMessages: PropTypes.bool.isRequired,
   onToggle: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,

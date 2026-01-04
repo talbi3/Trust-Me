@@ -3,10 +3,16 @@ import Joi from "joi";
 /**
  * Chat Schemas
  * POST /api/chat
- * Body: { message, helpOption, userId }
+ * Body: { message, helpOption, hasImage?, isVoiceMessage? }
  */
 
-const HELP_OPTIONS = ["block", "mute", "evidence"];
+const HELP_OPTIONS = [
+  "bullying",
+  "harassment",
+  "scam",
+  "inappropriate_content",
+  "other",
+];
 
 const postChatSchema = Joi.object({
   message: Joi.string().trim().min(1).max(1000).required().messages({
@@ -17,44 +23,38 @@ const postChatSchema = Joi.object({
     "any.required": "message is required",
   }),
 
-  helpOption: Joi.string().valid(...HELP_OPTIONS).required().messages({
-    "any.only": "helpOption must be one of: block, mute, evidence",
-    "any.required": "helpOption is required",
-  }),
+  helpOption: Joi.string()
+    .trim()
+    .lowercase() // ✅ "Bullying" -> "bullying"
+    .valid(...HELP_OPTIONS)
+    .required()
+    .messages({
+      "any.only": `helpOption must be one of: ${HELP_OPTIONS.join(", ")}`,
+      "any.required": "helpOption is required",
+    }),
 
-  userId: Joi.string().hex().length(24).required().messages({
-    "string.hex": "userId must be a valid Mongo ObjectId",
-    "string.length": "userId must be a valid Mongo ObjectId",
-    "any.required": "userId is required",
-  }),
-    hasImage: Joi.boolean().default(false),
-  isVoiceMessage: Joi.boolean().default(false)
+  hasImage: Joi.boolean().default(false),
+  isVoiceMessage: Joi.boolean().default(false),
 }).options({ stripUnknown: true });
 
-
+/**
+ * GET /api/chat/history/:day
+ */
 const dayParamSchema = Joi.object({
   day: Joi.string()
     .pattern(/^\d{4}-\d{2}-\d{2}$/)
     .required()
     .messages({
       "string.pattern.base": "Date must be in YYYY-MM-DD format",
-      "any.required": "Day parameter is required"
+      "any.required": "Day parameter is required",
     }),
 });
 
-const chatHistoryQuerySchema = Joi.object({
-  userId: Joi.string().hex().length(24).required().messages({
-    "string.hex": "Invalid userId format",
-    "string.length": "Invalid userId length",
-    "any.required": "userId query parameter is required"
+const sendMessageSchema = Joi.object({
+  message: Joi.string().trim().min(1).required().messages({
+    "string.empty": "Message cannot be empty",
   }),
-});
+}).options({ stripUnknown: true });
 
 
-export {
-  postChatSchema,
-  dayParamSchema,
-  chatHistoryQuerySchema,
-  
-
-};
+export { postChatSchema, dayParamSchema, sendMessageSchema };

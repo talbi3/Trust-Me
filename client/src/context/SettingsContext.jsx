@@ -1,12 +1,12 @@
-import { createContext, useState, useEffect, useCallback, useContext } from 'react';
-import PropTypes from 'prop-types';
-import api from '../services/api';
-import { UserContext } from './UserContext'; 
+import { createContext, useState, useEffect, useCallback, useContext } from "react";
+import PropTypes from "prop-types";
+import api from "../services/api";
+import { UserContext } from "./UserContext";
 
 const SettingsContext = createContext();
 
 const SettingsProvider = ({ children }) => {
-  const { user } = useContext(UserContext); 
+  const { user } = useContext(UserContext);
 
   const [settings, setSettings] = useState({
     notifications: { email: false, push: false },
@@ -19,11 +19,11 @@ const SettingsProvider = ({ children }) => {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const fetchSettings = useCallback(async () => {
-    if (!user?.email) return;
+    if (!user) return;
 
     try {
       setLoading(true);
-      const response = await api.get(`/api/user/settings?email=${user.email}`);
+      const response = await api.get("/api/user/settings");
       setSettings(response.data);
       setServerSettings(response.data);
     } catch (error) {
@@ -31,28 +31,23 @@ const SettingsProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [user]); 
+  }, [user]);
 
   useEffect(() => {
-    if (user?.email) {
+    if (user) {
       fetchSettings();
     }
   }, [fetchSettings, user]);
 
   const saveSettings = async () => {
-    if (!user?.email) return;
+    if (!user) return;
 
     setIsSaving(true);
     try {
-      const payload = {
-        email: user.email, 
-        ...settings
-      };
+      const response = await api.put("/api/user/settings", settings);
 
-      const response = await api.put('/api/user/settings', payload);
-      
-      if (response.data.success || response.status === 200) {
-        setServerSettings(settings); 
+      if (response.data?.success || response.status === 200) {
+        setServerSettings(settings);
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 3000);
       }
@@ -64,20 +59,20 @@ const SettingsProvider = ({ children }) => {
   };
 
   const toggleNotification = (type) => {
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
       notifications: {
         ...prev.notifications,
-        [type]: !prev.notifications[type]
-      }
+        [type]: !prev.notifications[type],
+      },
     }));
   };
 
   const toggleConnector = (appId, currentStatus) => {
-    const updatedConnectors = settings.connectors.map(app =>
+    const updatedConnectors = settings.connectors.map((app) =>
       app.id === appId ? { ...app, connected: !currentStatus } : app
     );
-    setSettings(prev => ({ ...prev, connectors: updatedConnectors }));
+    setSettings((prev) => ({ ...prev, connectors: updatedConnectors }));
   };
 
   const hasChanges = JSON.stringify(settings) !== JSON.stringify(serverSettings);
@@ -90,21 +85,17 @@ const SettingsProvider = ({ children }) => {
     showSuccess,
     saveSettings,
     fetchSettings,
-    connectors: settings.connectors,       
-    notifications: settings.notifications, 
+    connectors: settings.connectors,
+    notifications: settings.notifications,
     toggleConnector,
     toggleNotification,
   };
 
-  return (
-    <SettingsContext.Provider value={value}>
-      {children}
-    </SettingsContext.Provider>
-  );
+  return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
 };
 
 SettingsProvider.propTypes = {
-  children: PropTypes.node.isRequired
+  children: PropTypes.node.isRequired,
 };
 
 export { SettingsContext, SettingsProvider };

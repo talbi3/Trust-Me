@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/miryamMazor/Hackathon_2025_Maya_team#readme",
   "dependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "google-auth-library": "^10.5.0"
   }
 }

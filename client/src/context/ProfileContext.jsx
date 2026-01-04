@@ -8,14 +8,12 @@ const ProfileProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // GET Profile
-  const getProfile = async (email) => {
-    if (!email) return;
-
+  // GET Profile (token-based)
+  const getProfile = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/api/user/profile?email=${email}`);
-      setProfile(response.data); 
+      const response = await api.get("/api/user/profile");
+      setProfile(response.data);
     } catch (error) {
       console.error("Error fetching profile:", error);
     } finally {
@@ -27,13 +25,12 @@ const ProfileProvider = ({ children }) => {
     setLoading(true);
     try {
       const response = await api.put("/api/user/profile", updatedData);
-      
+
       if (response.data?.user) {
-        setProfile(response.data.user); 
+        setProfile(response.data.user);
         return true;
       }
       return false;
-
     } catch (error) {
       console.error("Error updating profile:", error);
       return false;

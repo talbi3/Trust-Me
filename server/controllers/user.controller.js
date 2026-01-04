@@ -1,196 +1,110 @@
-import User from '../data/user.schema.js';
-import UserMetadata from '../data/userMetadata.schema.js';
-import logger from '../utils/logger.js';
-import { EntityNotFoundError, CustomError } from '../utils/errors.js';
-import asyncHandler from '../utils/asyncHandler.js'; 
+import User from "../models/user.model.js";
+import UserMetadata from "../models/userMetadata.model.js";
+import logger from "../utils/logger.js";
+import asyncHandler from "../utils/asyncHandler.js";
 
 /**
  * GET /api/user/profile
+ * Auth: googleAuth middleware sets req.user
  */
 const getUserProfile = asyncHandler(async (req, res) => {
-    const { email } = req.query;
+  const user = req.user;
 
-    if (!email) {
-      throw new CustomError({ message: "Email query param is required.", statusCode: 400 });
-    }
-
-    const profileLogger = logger.child({ logMetadata: `User ${email}` });
-    profileLogger.debug("Requesting user profile");
-
-    const user = await User.findOne({ email }).lean();
-
-    if (!user) {
-      throw new EntityNotFoundError(`User with email ${email} not found`);
-    }
-
-    res.status(200).json({
-      name: user.name,
-      email: user.email,
-      profilePictureUrl: user.profilePictureUrl,
-      dateOfBirth: user.dateOfBirth,
-    });
+  res.status(200).json({
+    name: user.name,
+    email: user.email,
+    profilePictureUrl: user.profilePictureUrl,
+    dateOfBirth: user.dateOfBirth,
+  });
 });
 
 /**
  * PUT /api/user/profile
+ * Auth: googleAuth middleware sets req.user
  */
 const updateUserProfile = asyncHandler(async (req, res) => {
-    const { email, name, dateOfBirth, profilePictureUrl  } = req.body;
+  const userId = req.user._id;
+  const { name, dateOfBirth, profilePictureUrl } = req.body;
 
-    if (!email) {
-       throw new CustomError({ message: "Email is required to identify user", statusCode: 400 });
-    }
+  const profileLogger = logger.child({ logMetadata: `User ${userId}` });
+  profileLogger.debug("Updating user profile");
 
-    const profileLogger = logger.child({ logMetadata: `User ${email}` });
-    profileLogger.debug("Updating user profile");
+  const updateData = {};
+  if (name !== undefined) updateData.name = name;
+  if (dateOfBirth !== undefined) updateData.dateOfBirth = dateOfBirth;
+  if (profilePictureUrl !== undefined) updateData.profilePictureUrl = profilePictureUrl;
 
-    let updateData = { name, dateOfBirth };
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { $set: updateData },
+    { new: true, runValidators: true }
+  ).lean();
 
-    if (profilePictureUrl) { updateData.profilePictureUrl = profilePictureUrl; }
-
-    const updatedUser = await User.findOneAndUpdate(
-      { email: email },
-      updateData,
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedUser) {
-      throw new EntityNotFoundError(`User with email ${email} not found`);
-    }
-
-    res.status(200).json({ user: updatedUser });
+  res.status(200).json({ user: updatedUser });
 });
 
 /**
  * GET /api/user/settings
+ * Auth: googleAuth middleware sets req.user
  */
 const getUserSettings = asyncHandler(async (req, res) => {
-    const { email } = req.query;
-
-    if (!email) {
-      throw new CustomError({ message: "Email query param is required.", statusCode: 400 });
-    }
-
-    const settingsLogger = logger.child({ logMetadata: `User ${email}` });
-    settingsLogger.debug("Requesting user settings");
-
-    const user = await User.findOne({ email }).select('settings').lean();
-
-    if (!user) {
-      throw new EntityNotFoundError(`User with email ${email} not found`);
-    }
-
-    res.status(200).json(user.settings);
+  const user = req.user;
+  res.status(200).json(user.settings || {});
 });
 
 /**
  * PUT /api/user/settings
+ * Auth: googleAuth middleware sets req.user
  */
 const updateUserSettings = asyncHandler(async (req, res) => {
-    const { email, ...settingsData } = req.body;
+  const userId = req.user._id;
+  const settingsData = req.body;
 
-    if (!email) {
-       throw new CustomError({ message: "Email is required to identify user", statusCode: 400 });
-    }
+  const settingsLogger = logger.child({ logMetadata: `User ${userId}` });
+  settingsLogger.debug("Updating user settings");
 
-    const settingsLogger = logger.child({ logMetadata: `User ${email}` });
-    settingsLogger.debug("Updating user settings");
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { $set: { settings: settingsData } },
+    { new: true, runValidators: true }
+  ).lean();
 
-    const updatedUser = await User.findOneAndUpdate(
-      { email },
-      { $set: { settings: settingsData } },
-      { new: true, runValidators: true }
-    ).lean();
-
-    if (!updatedUser) {
-      throw new EntityNotFoundError(`User with email ${email} not found`);
-    }
-
-    res.status(200).json({ success: true, settings: updatedUser.settings });
+  res.status(200).json({ success: true, settings: updatedUser.settings });
 });
 
+
+
 /**
- * DELETE /api/user
+ * GET /api/user/metadata
+ * Auth: googleAuth middleware sets req.user
  */
-const deleteUser = asyncHandler(async (req, res) => {
-    const { email } = req.body;
+const getUserMetadata = asyncHandler(async (req, res) => {
+  const user = req.user;
 
-    if (!email) {
-      throw new CustomError({ message: "Email is required to identify user", statusCode: 400 });
-    }
+  const metaDoc = await UserMetadata.findOneAndUpdate(
+    { userId: user._id },
+    { $setOnInsert: { userId: user._id } },
+    { new: true, upsert: true }
+  ).lean();
 
-    const userLogger = logger.child({ logMetadata: `User ${email}` });
-    userLogger.warn("Deleting user account");
+  const preferences = {
+    ...(user.settings ?? {}),
+    ...(metaDoc.preferences ?? {}),
+  };
 
-    const user = await User.findOneAndDelete({ email });
-
-    if (!user) {
-      throw new EntityNotFoundError(`User with email ${email} not found`);
-    }
-
-    res.status(200).json({
-      message: "User deleted successfully",
-      deletedUserEmail: user.email
-    });
+  res.status(200).json({
+    userId: String(user._id),
+    pronouns: metaDoc.pronouns ?? "",
+    previousIncidents: metaDoc.previousIncidents ?? [],
+    preferences,
+    conversation: metaDoc.conversation ?? { lastConversationAt: null, conversationCount: 0 },
+  });
 });
-
-/**
- * GET /api/user/metadata?email=...
- * Returns minimal metadata object for context usage
- */
-const getUserMetadata = async (req, res) => {
-  try {
-    const { email } = req.query;
-
-    if (!email) {
-      throw new CustomError({ message: "Email is required to identify user", statusCode: 400 });
-    }
-
-    const user = await User.findOne({ email }).lean();
-
-    // Handle new/unknown user: return sparse metadata
-    if (!user) {
-      return res.status(200).json({
-        userId: null,
-        pronouns: "",
-        previousIncidents: [],
-        preferences: {},
-        conversation: { lastConversationAt: null, conversationCount: 0 }
-      });
-    }
-
-    // Upsert metadata doc (create default if missing)
-    const metaDoc = await UserMetadata.findOneAndUpdate(
-      { userId: user._id },
-      { $setOnInsert: { userId: user._id } },
-      { new: true, upsert: true }
-    ).lean();
-
-    // Build preferences for context (use your existing user.settings)
-    const preferences = {
-      ...(user.settings ?? {}),
-      ...(metaDoc.preferences ?? {}),
-    };
-
-    return res.status(200).json({
-      userId: String(user._id),
-      pronouns: metaDoc.pronouns ?? "",
-      previousIncidents: metaDoc.previousIncidents ?? [],
-      preferences,
-      conversation: metaDoc.conversation ?? { lastConversationAt: null, conversationCount: 0 }
-    });
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
-  }
-};
-
-
 
 export {
   getUserProfile,
   updateUserProfile,
   getUserSettings,
   updateUserSettings,
-  deleteUser,
-  getUserMetadata
+  getUserMetadata,
 };

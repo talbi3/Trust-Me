@@ -1,13 +1,9 @@
 import Joi from "joi";
-import { CONNECTOR_IDS } from "../data/connector.schema.js";
+import { CONNECTOR_IDS } from "../models/connector.schema.js";
 
 /**
  * User Fields
  */
-
-const emailField = Joi.string()
-  .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
-  .required();
 
 const profileFields = {
   name: Joi.string().min(3).max(30).messages({
@@ -42,41 +38,27 @@ const settingsFields = {
     .default(() => CONNECTOR_IDS.map((id) => ({ id, connected: false }))),
 };
 
-const baseUserFields = {
-  email: emailField,
-  ...profileFields,
-};
-
 /**
- * User Schemas
+ * Schemas
  */
 
-const createUserSchema = Joi.object({
-  ...baseUserFields,
-  settings: Joi.object(settingsFields),
+const googleLoginSchema = Joi.object({
+  idToken: Joi.string().required().messages({
+    "string.empty": "idToken is required",
+    "any.required": "idToken is required",
+  }),
 }).options({ stripUnknown: true });
 
-const loginSchema = Joi.object({
-  email: emailField.messages({
-    "string.email": "Please provide a valid email address",
-    "any.required": "Email is required for login",
-  }),
-});
-
 const updateUserProfileSchema = Joi.object({
-  email: emailField.optional(),
   ...profileFields,
-}).min(1);
+}).min(1).options({ stripUnknown: true });
 
 const updateUserSettingsSchema = Joi.object({
-  email: emailField.optional(),
   ...settingsFields,
-}).min(1);
-
+}).min(1).options({ stripUnknown: true });
 
 export {
-  createUserSchema,
-  loginSchema,
+  googleLoginSchema,
   updateUserProfileSchema,
   updateUserSettingsSchema,
 };

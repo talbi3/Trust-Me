@@ -9,9 +9,19 @@ const axiosInstance = axios.create({
   },
 });
 
+// REQUEST INTERCEPTOR – add Google ID token
 axiosInstance.interceptors.request.use(
   (config) => {
-    console.log(`🚀 [API Request] ${config.method?.toUpperCase()} ${config.url}`, config.data ? config.data : '');
+    const token = localStorage.getItem("googleIdToken");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    console.log(
+      `🚀 [API Request] ${config.method?.toUpperCase()} ${config.url}`,
+      config.data ? config.data : ''
+    );
+
     return config;
   },
   (error) => {
@@ -20,28 +30,36 @@ axiosInstance.interceptors.request.use(
   }
 );
 
+// RESPONSE INTERCEPTOR 
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log(`✅ [API Response] ${response.status} ${response.config.url}`, response.data);
+    console.log(
+      `✅ [API Response] ${response.status} ${response.config.url}`,
+      response.data
+    );
     return response;
   },
   (error) => {
-    if (!error.response || error.code === "ERR_NETWORK" || error.response.status === 401) {
-      
+    if (
+      !error.response ||
+      error.code === "ERR_NETWORK" ||
+      error.response.status === 401
+    ) {
       console.error("Server unavailable or unauthorized. Logging out...");
-      
+
       localStorage.removeItem("user");
-      
+      localStorage.removeItem("googleIdToken");
+
       if (window.location.pathname !== '/login') {
-         window.location.href = "/login";
+        window.location.href = "/login";
       }
     }
-    
+
     console.error(
-        `❌ [API Error] ${error.response?.status || 'Network'} ${error.config?.url}`, 
-        error.response?.data || error.message
+      `❌ [API Error] ${error.response?.status || 'Network'} ${error.config?.url}`,
+      error.response?.data || error.message
     );
-    
+
     return Promise.reject(error);
   }
 );

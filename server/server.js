@@ -1,62 +1,42 @@
-import express from "express";              // Express: web framework for building HTTP APIs
-import mongoose from "mongoose";           
+import express from "express";             
 import cors from "cors";                    
-import dotenv from "dotenv";     
 import path from 'path';
-import morgan from 'morgan';
 import { fileURLToPath } from 'url';
-
+import morganMiddleware from './middleware/morgan.middleware.js';
 import apiRouter from './routes/index.js';
-import connectDB from './config/db.js';
-import chatHistoryRoutes from "routes/chatHistoryRoutes.js";
-
-
-
+import {connectDB, getDBStatus} from './config/db.js';
+import config from './config/index.js';
+import logger from './utils/logger.js';
+import errorHandler from './middleware/error-handler.middleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load environment variables from .env into process.env
-dotenv.config();
+const app = express(); 
 
-// Create the Express application instance
-const app = express();
-app.use(morgan('dev')); // HTTP request logger
+/* ----------------------------- Middlewares ----------------------------- */
 
-// Parse incoming JSON bodies and put the result into req.body
-app.use(express.json());
-
+app.use(morganMiddleware); // Use Morgan middleware for logging HTTP requests
+app.use(express.json()); // Parse incoming JSON bodies and put the result into req.body
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(cors({ origin: config.cors.origin || "*" })); 
 
-// Enable CORS for the client origin (or allow all origins if CLIENT_URL is not set)
-app.use(cors({ origin: process.env.CLIENT_URL || "*" }));
+/* ------------------------------- Routes -------------------------------- */
 
-// Use chat history routes for /api/chat-history
-app.use("/api/chat-history", chatHistoryRoutes);
+// Health check endpoint
+app.get("/health", (req, res) => res.json({ ok: true })); 
 
-// Simple health endpoint: verifies the server is up
-app.get("/health", (req, res) => res.json({ ok: true }));
+// Database status endpoint
+app.get("/db-status", (req, res) => { res.json({ dbStatus: getDBStatus() }); }); 
 
-// Database status endpoint: returns Mongoose connection state
-app.get("/db-status", (req, res) => {
-  res.json({
-    mongooseState: mongoose.connection.readyState,
-  });
-});
+// Main API router
+app.use('/api', apiRouter);  
 
-// Use the main API router for all `/api` routes
-app.use('/api', apiRouter);
+// Error handler middleware
+app.use(errorHandler);
 
-// Connect to MongoDB and start the server only after DB is ready
-const PORT = process.env.PORT || 5000;
+/* --------------------------- Start DB and Server ------------------------------ */
 
-connectDB()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error('Failed to start server due to DB connection error:', err.message || err);
-    process.exit(1);
-  });
+await connectDB(); 
+
+app.listen(config.port, () => { logger.info(`Server is running on port ${config.port}`);}); 

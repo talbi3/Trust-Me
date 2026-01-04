@@ -1,5 +1,6 @@
 import express from 'express';
 import validateRequest from '../middleware/validate-request.middleware.js';
+import googleAuth from '../middleware/google-auth.middleware.js';
 import { 
     updateUserProfileSchema, 
     updateUserSettingsSchema 
@@ -10,17 +11,15 @@ import {
     updateUserProfile,
     getUserSettings,
     updateUserSettings,
-    deleteUser,
     getUserMetadata,
 } from '../controllers/user.controller.js';
 
-
 const router = express.Router();
+router.use(googleAuth);
 
 /**
  * Read Only Permission Routes
  */
-
 
 router.get('/profile', getUserProfile);
 router.get('/settings', getUserSettings);
@@ -31,7 +30,6 @@ router.get('/metadata', getUserMetadata);
  * Read and Write Permission Routes
  */
 
-router.delete('/', deleteUser);
 router.put('/profile', validateRequest(updateUserProfileSchema), updateUserProfile);
 router.put('/settings', validateRequest(updateUserSettingsSchema), updateUserSettings);
 
