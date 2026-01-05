@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
-// import styles from "./OnboardingPage.module.css";
+import styles from "./OnboardingPage.module.css";
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
@@ -35,26 +35,27 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>Complete your profile</h1>
+  <div className={styles.container}>
+    <div className={styles.card}>
+      <h1 className={styles.title}>Complete your profile</h1>
 
-      <form onSubmit={handleSubmit} style={{ maxWidth: 360 }}>
-        <div style={{ marginTop: 12 }}>
-          <label>Date of birth</label>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div>
+          <div className={styles.label}>Date of birth</div>
           <input
             type="date"
             value={dateOfBirth}
             onChange={(e) => setDateOfBirth(e.target.value)}
-            style={{ display: "block", width: "100%", padding: 8, marginTop: 6 }}
+            className={styles.input}
           />
         </div>
 
-        <div style={{ marginTop: 12 }}>
-          <label>How should we address you?</label>
+        <div>
+          <div className={styles.label}>How should we address you?</div>
           <select
             value={pronouns}
             onChange={(e) => setPronouns(e.target.value)}
-            style={{ display: "block", width: "100%", padding: 8, marginTop: 6 }}
+            className={styles.input}
           >
             <option value="">Select</option>
             <option value="he/him">He / Him</option>
@@ -64,12 +65,13 @@ export default function OnboardingPage() {
           </select>
         </div>
 
-        {error && <div style={{ marginTop: 12, color: "crimson" }}>{error}</div>}
+        {error && <div className={styles.error}>{error}</div>}
 
-        <button type="submit" disabled={isSubmitting} style={{ marginTop: 16, padding: 10, width: "100%" }}>
+        <button type="submit" className={styles.button} disabled={isSubmitting}>
           {isSubmitting ? "Saving..." : "Continue"}
         </button>
       </form>
     </div>
-  );
+  </div>
+);
 }
