@@ -1,5 +1,5 @@
 import User from '../models/user.model.js';
-import UserMetadata from '../models/userMetadata.model.js'; // נוסיף
+import UserMetadata from '../models/userMetadata.model.js'; 
 import logger from '../utils/logger.js';
 import { CustomError } from '../utils/errors.js';
 import asyncHandler from '../utils/asyncHandler.js';
@@ -71,3 +71,15 @@ const googleLogin = asyncHandler(async (req, res) => {
     isNewUser,
   });
 });
+
+const logout = asyncHandler(async (req, res) => {
+  logger.info('Logout request received');
+  res.status(200).json({ message: "Logged out successfully" });
+});
+
+
+export {
+  googleLogin,
+  logout,
+};
+

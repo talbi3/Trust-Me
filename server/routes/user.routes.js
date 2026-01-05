@@ -12,6 +12,7 @@ import {
     getUserSettings,
     updateUserSettings,
     getUserMetadata,
+    updateUserMetadata,
 } from '../controllers/user.controller.js';
 
 const router = express.Router();
@@ -32,5 +33,7 @@ router.get('/metadata', getUserMetadata);
 
 router.put('/profile', validateRequest(updateUserProfileSchema), updateUserProfile);
 router.put('/settings', validateRequest(updateUserSettingsSchema), updateUserSettings);
+router.put("/metadata", googleAuth, updateUserMetadata);
+
 
 export default router;

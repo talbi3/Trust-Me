@@ -7,9 +7,9 @@ import Settings from './pages/SettingsPage/SettingsPage.jsx';
 import Login from './pages/LoginPage/LoginPage.jsx';
 import Chat from "./pages/ChatPage/ChatPage.jsx";
 import { UserContext } from './context/UserContext.jsx';  
-
 import projectLogo from './assets/project-logo.png';
 import ChatHistoryPage from "./pages/ChatPage/ChatHistoryPage";
+import OnboardingPage from './pages/OnboardingPage/OnboardingPage.jsx';
 
 
 
@@ -53,6 +53,8 @@ function App() {
              <Route path="/chat" element={user ? <Chat /> : <Login />} />
             <Route path="/history" element={<ChatHistoryPage />} /> 
             <Route path="/login" element={<Login />} />
+            <Route path="/onboarding" element={user ? <OnboardingPage /> : <Login />} />
+
           </Routes>
         </main>
         

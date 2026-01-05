@@ -101,10 +101,36 @@ const getUserMetadata = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * PUT /api/user/metadata
+ * Auth: googleAuth middleware sets req.user
+ */
+const updateUserMetadata = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { pronouns } = req.body;
+
+  const metaLogger = logger.child({ logMetadata: `UserMetadata ${userId}` });
+  metaLogger.debug("Updating user metadata");
+
+  const updateData = {};
+  if (pronouns !== undefined) updateData.pronouns = pronouns;
+
+  const updatedMeta = await UserMetadata.findOneAndUpdate(
+    { userId },
+    { $set: updateData, $setOnInsert: { userId } },
+    { new: true, upsert: true, runValidators: true }
+  ).lean();
+
+  res.status(200).json({ success: true, metadata: updatedMeta });
+});
+
+
 export {
   getUserProfile,
   updateUserProfile,
   getUserSettings,
   updateUserSettings,
   getUserMetadata,
+  updateUserMetadata,
 };
+
