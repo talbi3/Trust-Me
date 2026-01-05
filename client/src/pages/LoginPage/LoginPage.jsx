@@ -24,10 +24,12 @@ export default function LoginPage() {
     const result = await loginWithGoogle(idToken);
 
     if (result.success) {
-      navigate("/chat");
-    } else {
-      setError(result.message || "Google login failed");
-    }
+  if (result.needsOnboarding) navigate("/onboarding");
+  else navigate("/chat");
+} else {
+  setError(result.message || "Google login failed");
+}
+
 
     setIsSubmitting(false);
   };
