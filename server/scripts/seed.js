@@ -1,3 +1,9 @@
+/**
+ * DEV ONLY
+ * This script is used only for local testing.
+ * Not used in production or app flow.
+ */
+
 import 'dotenv/config';
 import logger from '../utils/logger.js';
 import { faker } from '@faker-js/faker';
