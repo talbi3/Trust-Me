@@ -1,10 +1,12 @@
 import { useState, useContext, useEffect } from "react";
 import { ProfileContext } from "../context/ProfileContext";
+import { MetadataContext } from "../context/MetadataContext";
 import { UserContext } from "../context/UserContext";
 const API_BASE = import.meta.env.VITE_SERVER_API_URL || 'http://localhost:5000';
 
 export const useProfilePage = () => {
   const { profile, loading, getProfile, updateProfile } = useContext(ProfileContext);
+  const { metadata, loading: metadataLoading, getMetadata, updateMetadata } = useContext(MetadataContext);
   
   const { user } = useContext(UserContext);
 
@@ -21,18 +23,25 @@ export const useProfilePage = () => {
 
   useEffect(() => {
     if (user?.email && !profile) {
-      getProfile(user.email);
+      getProfile();
     }
   }, [user, profile, getProfile]);
 
+  useEffect(() => {
+    if (user?.email && !metadata) {
+      getMetadata();
+    }
+  }, [user, metadata, getMetadata]);
+
   const safeProfile = profile || {};
+  const safeMetadata = metadata || {};
 
   const handleEdit = () => {
     setStatus({ type: "", message: "" });
     setForm({
       name: safeProfile.name || "",
       email: safeProfile.email || "",
-      dateOfBirth: safeProfile.dateOfBirth || "",
+      dateOfBirth: safeMetadata.dateOfBirth || "",
       profilePictureUrl: safeProfile.profilePictureUrl || "",
     });
     setIsEditing(true);
@@ -81,14 +90,17 @@ export const useProfilePage = () => {
     setSaving(true);
     setStatus({ type: "", message: "" });
 
-    const payload = {
-      email: user.email,  
+    const profilePayload = {
       name: form.name.trim(),
-      dateOfBirth: form.dateOfBirth,
-      profilePictureUrl: form.profilePictureUrl, 
+      profilePictureUrl: form.profilePictureUrl,
     };
 
-    const success = await updateProfile(payload);
+    const [profileOk, metadataOk] = await Promise.all([
+      updateProfile(profilePayload),
+      updateMetadata({ dateOfBirth: form.dateOfBirth }),
+    ]);
+
+    const success = profileOk && metadataOk;
 
     if (success) {
       setStatus({ type: "success", message: "Saved successfully ✅" });
@@ -101,12 +113,14 @@ export const useProfilePage = () => {
 
   return {
     loading,
+    metadataLoading,
     saving,
     isEditing,
     status,
     form,
-    safeProfile,  
-    isDisabled: loading || saving,
+    safeProfile,
+    safeMetadata,
+    isDisabled: loading || metadataLoading || saving,
     setForm,
     handleEdit,
     handleCancel,

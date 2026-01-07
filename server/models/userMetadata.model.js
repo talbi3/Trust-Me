@@ -1,14 +1,5 @@
 import mongoose from "mongoose";
 
-const IncidentSchema = new mongoose.Schema(
-  {
-    type: { type: String, default: "" },
-    date: { type: Date, default: null },
-    notes: { type: String, default: "" },
-  },
-  { _id: false }
-);
-
 const userMetadataSchema = new mongoose.Schema(
   {
     userId: {
@@ -19,12 +10,11 @@ const userMetadataSchema = new mongoose.Schema(
       index: true,
     },
 
+    nickName: { type: String, default: "" },
+
+    dateOfBirth: { type: String, default: "" },
+
     pronouns: { type: String, default: "" },
-
-    previousIncidents: { type: [IncidentSchema], default: [] },
-
-    // Extra preferences beyond user.settings (optional)
-    preferences: { type: Object, default: {} },
   },
   { timestamps: true }
 );

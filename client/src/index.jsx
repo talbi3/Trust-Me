@@ -4,6 +4,7 @@ import './styles/global.css';
 import App from './App.jsx';
 import { UserProvider } from './context/UserContext.jsx';
 import { ProfileProvider } from './context/ProfileContext.jsx';
+import { MetadataProvider } from './context/MetadataContext.jsx';
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -12,7 +13,9 @@ root.render(
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <UserProvider>
         <ProfileProvider>
-          <App />
+          <MetadataProvider>
+            <App />
+          </MetadataProvider>
         </ProfileProvider>
       </UserProvider>
     </GoogleOAuthProvider>

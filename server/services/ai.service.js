@@ -30,9 +30,13 @@ const loadSystemPrompt = async (currentTopic) => {
   }
 };
 
-const generateAIResponse = async (chatHistory, topic) => {
+const generateAIResponse = async (chatHistory, topic, userMetadata) => {
   try {
     const systemInstruction = await loadSystemPrompt(topic);
+
+    const metadataBlock = userMetadata
+      ? `\n\nUser metadata (for personalization; do not invent missing fields):\n${JSON.stringify(userMetadata)}`
+      : "";
 
     const messages = chatHistory.map((msg) => ({
       role: msg.role,
@@ -41,7 +45,7 @@ const generateAIResponse = async (chatHistory, topic) => {
 
     messages.unshift({
       role: "system",
-      content: systemInstruction,
+      content: systemInstruction + metadataBlock,
     });
 
     const completion = await openai.chat.completions.create({

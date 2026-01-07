@@ -13,12 +13,6 @@ const profileFields = {
     "string.max": "Name must not exceed 30 characters.",
   }),
   profilePictureUrl: Joi.string().uri().allow("").optional(),
-  dateOfBirth: Joi.string()
-    .pattern(/^\d{4}-\d{2}-\d{2}$/)
-    .optional()
-    .messages({
-      "string.pattern.base": "Date of Birth must be in the format YYYY-MM-DD.",
-    }),
 };
 
 const joiConnectorSchema = Joi.object({
