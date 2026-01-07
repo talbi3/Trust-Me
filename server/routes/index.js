@@ -9,6 +9,6 @@ const apiRouter = express.Router();
 
 apiRouter.use('/user', userRoutes);
 apiRouter.use('/auth', authRoutes);
-apiRouter.use('/uploads', uploadRoutes);
+apiRouter.use('/upload', uploadRoutes);
 apiRouter.use('/chats', chatRoutes);
 export default apiRouter;

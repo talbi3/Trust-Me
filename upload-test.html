@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="he">
+  <head>
+    <meta charset="UTF-8" />
+    <title>בדיקת העלאת תמונה</title>
+  </head>
+  <body style="background-color: white; color: black; font-family: Arial;">
+    <h2>בדיקת העלאת תמונת פרופיל</h2>
+
+    <form
+      action="http://localhost:5000/api/upload/profile-picture"
+      method="post"
+      enctype="multipart/form-data"
+    >
+      <input type="file" name="image" />
+      <br /><br />
+      <button type="submit">העלה תמונה</button>
+    </form>
+  </body>
+</html>
