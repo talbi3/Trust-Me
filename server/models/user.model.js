@@ -7,9 +7,7 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true },
     profilePictureUrl: { type: String, default: "" },
     dateOfBirth:  {
-        type: String,  
-        required: true
-    },
+        type: String},
 
     settings: {
       notifications: {

@@ -1,3 +1,9 @@
+/**
+ * DEV ONLY
+ * This script is used only for local testing.
+ * Not used in production or app flow.
+ */
+
 import 'dotenv/config';
 import logger from '../utils/logger.js';
 import { faker } from '@faker-js/faker';
@@ -13,7 +19,7 @@ const SEEDED_GOOGLE_USERS = [
     email: "katzori1999@gmail.com",
     name: "Ori Katz",
     profilePictureUrl: "https://robohash.org/ori1?set=set4",
-    dateOfBirth: "1999-07-16",
+    //dateOfBirth: "1999-07-16",
   },
   {
     email: "orishlach20@gmail.com",

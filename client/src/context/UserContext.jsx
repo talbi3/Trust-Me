@@ -29,23 +29,26 @@ const UserProvider = ({ children }) => {
   }, []);
 
   const loginWithGoogle = async (idToken) => {
-    try {
-      const res = await api.post("/api/auth/google", { idToken });
-      const userData = res.data.user;
+  try {
+    const res = await api.post("/api/auth/google", { idToken });
 
-      setUser(userData);
-      localStorage.setItem("user", JSON.stringify(userData));
-      localStorage.setItem("googleIdToken", idToken);
+    const userData = res.data.user;
+    const needsOnboarding = !!res.data.needsOnboarding;
 
-      return { success: true };
-    } catch (error) {
-      console.error("Google login error:", error);
-      return {
-        success: false,
-        message: error.response?.data?.error || "Google login failed",
-      };
-    }
-  };
+    setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("googleIdToken", idToken); 
+
+    return { success: true, needsOnboarding };
+  } catch (error) {
+    console.error("Google login error:", error);
+    return {
+      success: false,
+      message: error.response?.data?.error || "Google login failed",
+    };
+  }
+};
+
 
   const logout = async () => {
     try {

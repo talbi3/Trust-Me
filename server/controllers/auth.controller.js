@@ -1,18 +1,15 @@
 import User from '../models/user.model.js';
+import UserMetadata from '../models/userMetadata.model.js'; 
 import logger from '../utils/logger.js';
 import { CustomError } from '../utils/errors.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import { OAuth2Client } from "google-auth-library";
 
-/**
- * Google OAuth client
- */
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
 
 /**
  * POST /api/auth/google
- * Google Login (seeded users only)
+ * Google Login or Register
  */
 const googleLogin = asyncHandler(async (req, res) => {
   const { idToken } = req.body;
@@ -33,29 +30,56 @@ const googleLogin = asyncHandler(async (req, res) => {
     throw new CustomError({ message: "Google token missing email.", statusCode: 400 });
   }
 
+  const name = payload?.name || "";
+  const profilePictureUrl = payload?.picture || "";
+
   const authLogger = logger.child({ logMetadata: `GoogleLogin ${email}` });
   authLogger.info('Google login attempt');
 
-  const user = await User.findOne({ email }).lean();
+  // 1) Find existing user
+  let user = await User.findOne({ email });
 
+  // 2) If not exists -> create user (registration)
+  let isNewUser = false;
   if (!user) {
-    authLogger.warn('User not found for google login (not seeded)');
-    throw new CustomError({ message: "User not found. Please ask admin to add you.", statusCode: 401 });
+    authLogger.info('User not found - creating new user from Google profile');
+
+    user = await User.create({
+      name,
+      email,
+      profilePictureUrl,
+      // dateOfBirth נשאר ריק -> onboarding ימלא
+    });
+
+    isNewUser = true;
   }
 
+  // 3) Ensure metadata doc exists (so we can later save pronouns safely)
+  const metaDoc = await UserMetadata.findOneAndUpdate(
+    { userId: user._id },
+    { $setOnInsert: { userId: user._id } },
+    { new: true, upsert: true }
+  ).lean();
+
+  // 4) Compute needsOnboarding (כרגע: DOB + pronouns)
+  const needsOnboarding = !user.dateOfBirth || !metaDoc?.pronouns;
+
   authLogger.info('Google login successful');
-  res.status(200).json({ user });
+  res.status(200).json({
+    user: user.toObject ? user.toObject() : user, // אם זה doc של mongoose
+    needsOnboarding,
+    isNewUser,
+  });
 });
 
-/**
- * POST /api/auth/logout
- */
 const logout = asyncHandler(async (req, res) => {
   logger.info('Logout request received');
   res.status(200).json({ message: "Logged out successfully" });
 });
 
+
 export {
   googleLogin,
-  logout
+  logout,
 };
+
