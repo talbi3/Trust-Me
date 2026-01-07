@@ -21,6 +21,11 @@ const SEEDED_GOOGLE_USERS = [
     profilePictureUrl: "https://robohash.org/ori1?set=set4",
   },
   {
+    email: "tamarbe25@gmail.com",
+    name: "Tamar Ben Eliyahu",
+    profilePictureUrl: "https://robohash.org/ori1?set=set4",
+  },
+  {
     email: "orishlach20@gmail.com",
     name: "Or Ishlach",
     profilePictureUrl: "https://robohash.org/ori2?set=set4",
