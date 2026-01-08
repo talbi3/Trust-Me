@@ -4,6 +4,29 @@ import { Sparkles,User } from 'lucide-react';
 import styles from './MessageList.module.css';
 import TextToSpeech from '../../common/TextToSpeech/TextToSpeech.jsx'; // Make sure this path is correct
 
+// Function to convert URLs in text to clickable links
+const linkifyText = (text) => {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  
+  return parts.map((part, index) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a 
+          key={index} 
+          href={part} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{ color: '#4A90E2', textDecoration: 'underline' }}
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+};
+
 const MessageList = ({ messages, isLoading }) => {
   const messagesEndRef = useRef(null);
 
@@ -40,7 +63,7 @@ const MessageList = ({ messages, isLoading }) => {
               {/* Text Content + Speaker Button */}
               {message.content && (
                 <>
-                  <p className={styles.text}>{message.content}</p>
+                  <p className={styles.text}>{linkifyText(message.content)}</p>
 
                   {/* ✅ INSERTED HERE: Speaker Button */}
                   <div style={{ marginTop: '5px', display: 'flex', justifyContent: 'flex-end', opacity: 0.7 }}>
