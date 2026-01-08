@@ -1,5 +1,5 @@
 import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router'; 
-import { FiBell, FiCommand } from 'react-icons/fi';
+import { FiBell, FiCommand, FiUser } from 'react-icons/fi';
 import Sidebar from '../../components/Sidebar/Sidebar.jsx'; 
 import styles from './Settings.module.css'; 
 import { SettingsProvider } from '../../context/SettingsContext.jsx';
@@ -7,6 +7,7 @@ import BottomActionBar from '../../components/BottomActionBar/BottomActionBar.js
 
 import NotificationsTab from './tabs/NotificationsTab.jsx';
 import ConnectorsTab from './tabs/ConnectorsTab.jsx'; 
+import MetadataTab from './tabs/MetadataTab.jsx';
 
  
 const Settings = () => {
@@ -25,6 +26,7 @@ const Settings = () => {
 
   const menuItems = [
     { id: 'notifications', icon: <FiBell size={18} />, label: 'Notifications' },
+    { id: 'personalization', icon: <FiUser size={18} />, label: 'Personalization' },
     { id: 'apps-and-connectors', icon: <FiCommand size={18} />, label: 'Apps and Connectors' },
   ];
 
@@ -47,6 +49,7 @@ const Settings = () => {
             <Routes>
               <Route index element={<Navigate to="notifications" replace />} />
               <Route path="notifications" element={<NotificationsTab />} />
+              <Route path="personalization" element={<MetadataTab />} />
               <Route path="apps-and-connectors" element={<ConnectorsTab />} />
             </Routes>
           </div>
