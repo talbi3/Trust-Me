@@ -1,3 +1,4 @@
+
 import { useState, useContext, useEffect } from "react";
 import { ProfileContext } from "../context/ProfileContext";
 import { MetadataContext } from "../context/MetadataContext";
@@ -62,20 +63,18 @@ export const useProfilePage = () => {
       const formData = new FormData();
       formData.append("image", file); 
 
-      const res = await fetch("/api/uploads/profile-picture", {
+      const uploadUrl = `${API_BASE.replace(/\/$/, "")}/api/upload/profile-picture`;
+
+      const res = await fetch(uploadUrl, {
         method: "POST",
         body: formData,
-      });
+      }); 
 
       if (!res.ok) throw new Error("Upload failed");
 
       const data = await res.json();
-      
-      const fullUrl = data.url.startsWith("http") 
-        ? data.url 
-        : `${API_BASE}${data.url}`;
 
-      setForm((prev) => ({ ...prev, profilePictureUrl: fullUrl }));
+      setForm((prev) => ({ ...prev, profilePictureUrl: data.url }));
       setStatus({ type: "success", message: "Image uploaded! Don't forget to Save." });
       
     } catch (err) {

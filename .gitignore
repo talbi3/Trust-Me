@@ -129,9 +129,9 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# User uploads - ignore all files but keep the directory
-server/uploads/*
-!server/uploads/.gitkeep
+# No local uploads – using Cloudinary
+uploads/
+server/uploads/
 
 
 # Server logs
