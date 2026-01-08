@@ -12,6 +12,7 @@ export default function ProfilePage() {
     status,
     form,
     safeProfile,
+    safeMetadata,
     isDisabled,
     setForm,
     handleEdit,
@@ -75,7 +76,7 @@ export default function ProfilePage() {
             <EditableField
               label="Date of birth"
               type="date"
-              value={isEditing ? form.dateOfBirth : (safeProfile.dateOfBirth || "—")}
+              value={isEditing ? form.dateOfBirth : (safeMetadata.dateOfBirth || "—")}
               isEditing={isEditing}
               onChange={(e) => setForm(prev => ({ ...prev, dateOfBirth: e.target.value }))}
             />

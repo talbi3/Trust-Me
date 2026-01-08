@@ -3,6 +3,7 @@ import { EntityNotFoundError, createValidationError } from "../utils/errors.js";
 import logger from "../utils/logger.js";
 import Chat from "../models/chat.model.js";
 import Message from "../models/message.model.js";
+import UserMetadata from "../models/userMetadata.model.js";
 import { generateAIResponse } from "../services/ai.service.js";
 import { sendMessageSchema } from "../validations/chat.validation.js";
 
@@ -95,10 +96,23 @@ const sendMessage = asyncHandler(async (req, res) => {
 
   // 4. Get History for AI Context
   const history = await Message.find({ chatId }).sort({ createdAt: 1 });
+
+  // 4.1 Get (or create) User Metadata to personalize AI responses
+  const metaDoc = await UserMetadata.findOneAndUpdate(
+    { userId: req.user._id },
+    { $setOnInsert: { userId: req.user._id } },
+    { new: true, upsert: true }
+  ).lean();
+
+  const userMetadata = {
+    nickName: metaDoc?.nickName ?? "",
+    dateOfBirth: metaDoc?.dateOfBirth ?? "",
+    pronouns: metaDoc?.pronouns ?? "",
+  };
   
   // 5. Generate AI Response
   // UPDATED: Pass 'chat.category' as the 2nd argument so the AI knows the context
-  const aiContent = await generateAIResponse(history, chat.category);
+  const aiContent = await generateAIResponse(history, chat.category, userMetadata);
 
   // 6. Save Assistant Message
   const aiMessage = await Message.create({

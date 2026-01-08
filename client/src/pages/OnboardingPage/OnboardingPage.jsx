@@ -1,29 +1,58 @@
-import { useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../services/api";
+import { MetadataContext } from "../../context/MetadataContext";
 import styles from "./OnboardingPage.module.css";
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
+  const { metadata, getMetadata, updateMetadata } = useContext(MetadataContext);
   const [dateOfBirth, setDateOfBirth] = useState("");
+  const [nickName, setNickName] = useState("");
   const [pronouns, setPronouns] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!metadata) {
+      getMetadata();
+    }
+  }, [metadata, getMetadata]);
+
+  useEffect(() => {
+    if (!metadata) return;
+
+    const hasAllRequired =
+      Boolean(metadata.dateOfBirth) &&
+      Boolean(metadata.nickName) &&
+      Boolean(metadata.pronouns);
+
+    if (hasAllRequired) {
+      navigate("/chat", { replace: true });
+      return;
+    }
+
+    // Prefill what we have
+    if (metadata.dateOfBirth && !dateOfBirth) setDateOfBirth(metadata.dateOfBirth);
+    if (metadata.nickName && !nickName) setNickName(metadata.nickName);
+    if (metadata.pronouns && !pronouns) setPronouns(metadata.pronouns);
+  }, [metadata, navigate, dateOfBirth, nickName, pronouns]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!dateOfBirth || !pronouns) {
-      setError("Please fill in date of birth and pronouns.");
+    if (!dateOfBirth || !nickName || !pronouns) {
+      setError("Please fill in date of birth, nickname and pronouns.");
       return;
     }
 
     try {
       setIsSubmitting(true);
 
-      await api.put("/api/user/profile", { dateOfBirth });
-      await api.put("/api/user/metadata", { pronouns });
+      const ok = await updateMetadata({ dateOfBirth, nickName, pronouns });
+      if (!ok) {
+        throw new Error("Failed to update metadata");
+      }
 
       navigate("/chat");
     } catch (err) {
@@ -46,6 +75,16 @@ export default function OnboardingPage() {
             type="date"
             value={dateOfBirth}
             onChange={(e) => setDateOfBirth(e.target.value)}
+            className={styles.input}
+          />
+        </div>
+
+        <div>
+          <div className={styles.label}>Nickname</div>
+          <input
+            type="text"
+            value={nickName}
+            onChange={(e) => setNickName(e.target.value)}
             className={styles.input}
           />
         </div>

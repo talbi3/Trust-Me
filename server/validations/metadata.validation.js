@@ -4,24 +4,16 @@ import Joi from "joi";
  * UserMetadata Schemas
  */
 
-const INCIDENT_TYPES = [
-  "bullying",
-  "harassment",
-  "scam",
-  "inappropriate_content",
-  "other",
-];
-
-const incidentSchema = Joi.object({
-  type: Joi.string().valid(...INCIDENT_TYPES).required(),
-  date: Joi.date().less("now").optional(),
-  notes: Joi.string().max(500).allow("").optional(),
-});
-
 const upsertUserMetadataSchema = Joi.object({
+  nickName: Joi.string().max(50).allow("").optional(),
+  dateOfBirth: Joi.string()
+    .pattern(/^\d{4}-\d{2}-\d{2}$/)
+    .allow("")
+    .optional()
+    .messages({
+      "string.pattern.base": "Date of Birth must be in the format YYYY-MM-DD.",
+    }),
   pronouns: Joi.string().max(50).allow("").optional(),
-  previousIncidents: Joi.array().items(incidentSchema).optional(),
-  preferences: Joi.object().unknown(true).optional(),
 }).min(1);
 
 const userIdParamSchema = Joi.object({
@@ -33,5 +25,4 @@ const userIdParamSchema = Joi.object({
 export {
   upsertUserMetadataSchema,
   userIdParamSchema,
-  incidentSchema,
 };

@@ -48,7 +48,6 @@ const googleLogin = asyncHandler(async (req, res) => {
       name,
       email,
       profilePictureUrl,
-      // dateOfBirth נשאר ריק -> onboarding ימלא
     });
 
     isNewUser = true;
@@ -61,8 +60,11 @@ const googleLogin = asyncHandler(async (req, res) => {
     { new: true, upsert: true }
   ).lean();
 
-  // 4) Compute needsOnboarding (כרגע: DOB + pronouns)
-  const needsOnboarding = !user.dateOfBirth || !metaDoc?.pronouns;
+  // 4) Compute needsOnboarding based on UserMetadata
+  const needsOnboarding =
+    !metaDoc?.dateOfBirth ||
+    !metaDoc?.pronouns ||
+    !metaDoc?.nickName;
 
   authLogger.info('Google login successful');
   res.status(200).json({

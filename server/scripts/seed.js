@@ -19,19 +19,21 @@ const SEEDED_GOOGLE_USERS = [
     email: "katzori1999@gmail.com",
     name: "Ori Katz",
     profilePictureUrl: "https://robohash.org/ori1?set=set4",
-    //dateOfBirth: "1999-07-16",
+  },
+  {
+    email: "tamarbe25@gmail.com",
+    name: "Tamar Ben Eliyahu",
+    profilePictureUrl: "https://robohash.org/ori1?set=set4",
   },
   {
     email: "orishlach20@gmail.com",
     name: "Or Ishlach",
     profilePictureUrl: "https://robohash.org/ori2?set=set4",
-    dateOfBirth: "1999-01-01",
   },
   {
     email: "orEkronot@gmail.com",
     name: "Or 2",
     profilePictureUrl: "https://robohash.org/ori3?set=set4",
-    dateOfBirth: "1999-01-01",
   },
 ].map((u, idx) => ({
   ...u,
@@ -40,17 +42,6 @@ const SEEDED_GOOGLE_USERS = [
     connectors: CONNECTOR_IDS.map((id) => ({ id, connected: idx === 0 })), 
   },
 }));
-
-const INCIDENT_TYPES = ["bullying", "harassment", "scam", "inappropriate_content", "other"];
-
-const createRandomIncidents = () => {
-  const count = faker.number.int({ min: 0, max: 3 });
-  return Array.from({ length: count }).map(() => ({
-    type: faker.helpers.arrayElement(INCIDENT_TYPES),
-    date: faker.date.past({ years: 2 }),
-    notes: faker.lorem.sentence(),
-  }));
-};
 
 const getRandomPronouns = () => faker.helpers.arrayElement(["she/her", "he/him", "they/them"]);
 
@@ -73,8 +64,7 @@ const seedDB = async () => {
     const metadataDocs = insertedUsers.map((user) => ({
       userId: user._id,
       pronouns: getRandomPronouns(),
-      previousIncidents: createRandomIncidents(),
-      preferences: {},
+      // previousIncidents/preferences removed; keep seed minimal
     }));
 
     await UserMetadata.insertMany(metadataDocs);
