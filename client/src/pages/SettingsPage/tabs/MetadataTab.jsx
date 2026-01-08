@@ -22,6 +22,7 @@ const MetadataTab = () => {
   const [pronouns, setPronouns] = useState("");
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState({ type: "", message: "" });
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     if (!metadata) {
@@ -29,11 +30,16 @@ const MetadataTab = () => {
     }
   }, [metadata, getMetadata]);
 
+  // Use a ref-based approach to avoid setState in effect
   useEffect(() => {
-    if (!metadata) return;
-    setNickName(metadata.nickName ?? "");
-    setPronouns(metadata.pronouns ?? "");
-  }, [metadata]);
+    if (metadata && !initialized) {
+      queueMicrotask(() => {
+        setNickName(metadata.nickName ?? "");
+        setPronouns(metadata.pronouns ?? "");
+        setInitialized(true);
+      });
+    }
+  }, [metadata, initialized]);
 
   const isDirty = useMemo(() => {
     if (!metadata) return false;
