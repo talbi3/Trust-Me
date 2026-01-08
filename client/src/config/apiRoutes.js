@@ -21,7 +21,7 @@ export const API_ROUTES = {
     UPDATE: `/api/user/profile`,
   },
   UPLOADS: {
-    PROFILE_PICTURE: `/api/uploads/profile-picture`,
+    PROFILE_PICTURE: `/api/upload/profile-picture`,
   },
   SETTINGS: {
     GET: `/api/user/settings`,
