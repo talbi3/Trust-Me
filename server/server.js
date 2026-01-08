@@ -18,7 +18,6 @@ const app = express();
 
 app.use(morganMiddleware); // Use Morgan middleware for logging HTTP requests
 app.use(express.json()); // Parse incoming JSON bodies and put the result into req.body
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(cors({ origin: config.cors.origin || "*" })); 
 
 /* ------------------------------- Routes -------------------------------- */
