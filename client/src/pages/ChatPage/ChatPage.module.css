@@ -97,6 +97,13 @@
   flex-wrap: wrap;
 }
 
+/* Privacy note under Safety Assistant */
+.privacyNote {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
 /* Chat Content Area */
 .chatContent {
   flex: 1;

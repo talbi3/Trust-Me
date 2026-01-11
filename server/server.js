@@ -1,7 +1,5 @@
 import express from "express";             
 import cors from "cors";                    
-import path from 'path';
-import { fileURLToPath } from 'url';
 import morganMiddleware from './middleware/morgan.middleware.js';
 import apiRouter from './routes/index.js';
 import {connectDB, getDBStatus} from './config/db.js';
@@ -9,8 +7,6 @@ import config from './config/index.js';
 import logger from './utils/logger.js';
 import errorHandler from './middleware/error-handler.middleware.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express(); 
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, isValidElement } from "react"; // Added isValidElement
+import { useEffect, useRef, useState, useCallback, isValidElement, useContext } from "react"; // Added isValidElement
 import { useNavigate } from "react-router-dom";
 import { RotateCcw, History as HistoryIcon, Sparkles } from "lucide-react";
 import styles from "./ChatPage.module.css";
@@ -17,12 +17,16 @@ import Button from "../../components/common/Button/Button";
 import useSpeechRecognition from "../../hooks/useSpeechRecognition";
 import { useChatUser } from "../../hooks/useChatUser";  
 import { useChat } from "../../hooks/useChat";          
+import { MetadataContext } from "../../context/MetadataContext.jsx";
+import { UserContext } from "../../context/UserContext.jsx";
 
 export default function ChatPage() {
   const navigate = useNavigate();
   
   // 1. Get User
   const activeUserId = useChatUser();
+  const { user } = useContext(UserContext);
+  const { metadata, getMetadata } = useContext(MetadataContext);
 
   // 2. Get Chat Logic & State
   const {
@@ -67,6 +71,15 @@ export default function ChatPage() {
       handleSendMessage(text);
   };
 
+  // Load metadata to greet with nickname
+  useEffect(() => {
+    if (user && !metadata) {
+      getMetadata();
+    }
+  }, [user, metadata, getMetadata]);
+
+  const displayName = metadata?.nickName || user?.name || null;
+
 
   const renderIcon = (icon) => {
     if (!icon) return null;
@@ -94,7 +107,13 @@ export default function ChatPage() {
           <div className={styles.headerRow}>
             <div>
               <h1 className={styles.title}>New Chat</h1>
-              <p className={styles.subtitle}>Select a topic to start</p>
+              {displayName ? (
+                <p className={styles.subtitle} style={{ fontSize: "0.95rem" }}>
+                  HEY {displayName}! Nice to have you back.
+                </p>
+              ) : (
+                <p className={styles.subtitle}>Select a topic to start</p>
+              )}
             </div>
             <Button
               variant="outline"
@@ -136,12 +155,15 @@ export default function ChatPage() {
         <div className={styles.card}>
           {/* Header */}
           <div className={styles.chatHeader}>
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               {/* FIX: Use the helper function here instead of direct render */}
               {renderIcon(selectedCategory.icon)}
-              
-              <span style={{ fontWeight: "bold" }}>Safety Assistant</span>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span style={{ fontWeight: "bold" }}>Safety Assistant</span>
+                <span className={styles.privacyNote} style={{ marginTop: 2 }}>
+                  Your conversation is private — no sharing, no judgment.
+                </span>
+              </div>
             </div>
 
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>

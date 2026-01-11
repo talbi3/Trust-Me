@@ -16,7 +16,8 @@ const CategorySelector = ({ onSelectCategory, userId }) => {
           <Sparkles className={styles.logoIcon} />
         </div>
         <h1 className={styles.title}>Support Assistant</h1>
-        <p className={styles.subtitle}>How can I help you today?</p>
+        <p className={styles.subtitle} style={{ marginBottom: 4 }}>This is a safe place. You’re not alone.</p>
+        <p className={styles.subtitle} style={{ fontSize: '0.95rem' }}>You can say anything here. I’m listening.</p>
       </div>
 
       <div className={styles.list}>
