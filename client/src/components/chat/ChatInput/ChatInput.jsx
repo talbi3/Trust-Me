@@ -32,9 +32,6 @@ const ChatInput = ({
     // Validate file type
     if (!file || !file.type.startsWith('image/')) return;
 
-    // ERROR WAS HERE: 
-    // Previously, you used FileReader to create a string. 
-    // Now, we pass the raw File object directly to useChat.
     // useChat will handle creating the preview URL and storing the file for upload.
     setImagePreview(file);
 

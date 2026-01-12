@@ -78,7 +78,7 @@ const sendMessage = asyncHandler(async (req, res) => {
     throw createValidationError(error.details[0].message); 
   }
   
-  const { message: userContent, hasImage } = value;
+  const { message: userContent, hasImage, imageUrl } = value;
 
   // 2. Verify Chat Ownership
   const chat = await Chat.findOne({ _id: chatId, userId: req.user._id });
@@ -91,6 +91,7 @@ const sendMessage = asyncHandler(async (req, res) => {
     chatId,
     role: "user",
     content: userContent,
+    imageUrl: imageUrl || null,
     hasImage: hasImage || false 
   });
 

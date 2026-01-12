@@ -71,7 +71,8 @@ export const useChat = (activeUserId) => {
         // If DB has 'role', use it to set 'type', otherwise default to msg.type
         type: msg.role === 'user' ? 'user' : 'assistant',
         // Ensure we have a valid ID for React keys
-        id: msg._id || msg.id || Date.now()
+        id: msg._id || msg.id || Date.now(),
+        imageUrl: msg.imageUrl || null
       }));
 
       // 4. Update State
@@ -102,88 +103,80 @@ export const useChat = (activeUserId) => {
    * 2. Upload image to Cloudinary (if exists)
    * 3. Send text + image URL to backend
    */
-  const handleSendMessage = async (overrideText = null) => {
-    const textToSend = overrideText || inputValue;
+const handleSendMessage = async (overrideText = null) => {
+  const textToSend = overrideText || inputValue;
 
-    // Validation: Don't send if empty AND no image, or if currently loading
-    if ((!textToSend.trim() && !imageFile) || isLoading) return;
+  if ((!textToSend.trim() && !imageFile) || isLoading) return;
 
-    if (!activeUserId) {
-        console.error("No active user found! Cannot send message.");
-        return;
+  if (!activeUserId) {
+      console.error("No active user found! Cannot send message.");
+      return;
+  }
+
+  const tempId = Date.now(); 
+
+  // Optimistic UI Update - שימוש ב-imageUrl
+  const optimisticUserMessage = {
+    id: tempId, 
+    role: "user",
+    type: "user", 
+    content: textToSend, 
+    imageUrl: imagePreview, // ← שימוש ב-imageUrl (תצוגה מקומית זמנית)
+    createdAt: new Date(),
+    timestamp: new Date(), 
+  };
+
+  setMessages((prev) => [...prev, optimisticUserMessage]);
+  
+  const fileToUpload = imageFile; 
+  setInputValue("");
+  setImagePreview(null); 
+  setImageFile(null);
+
+  setIsLoading(true);
+
+  try {
+    let chatId = currentChatId;
+
+    if (!chatId) {
+      const categoryId = selectedCategory?.id || "general";
+      const newChat = await createChatSession(categoryId); 
+      chatId = newChat._id || newChat.id; 
+      setCurrentChatId(chatId); 
     }
 
-    // 1. Generate Temporary ID
-    const tempId = Date.now(); 
+    // Upload Image (if selected)
+    let uploadedImageUrl = null;
+    if (fileToUpload) {
+      uploadedImageUrl = await uploadChatImage(fileToUpload);
+    }
 
-    // Optimistic UI Update
-    // We use 'imagePreview' (Blob URL) here so the user sees the image instantly
-    const optimisticUserMessage = {
-      id: tempId, 
-      role: "user",
-      type: "user", 
-      content: textToSend, 
-      imageUrl: imagePreview, 
-      createdAt: new Date(),
-      timestamp: new Date(), 
+    // Send Message to Backend with the Cloudinary URL
+    const data = await sendChatMessage(chatId, textToSend, uploadedImageUrl); 
+
+    // Update the Temporary ID with Real ID & Real Image URL
+    setMessages((prev) => prev.map((msg) => {
+      if (msg.id === tempId) {
+        return {
+           ...msg,
+           id: data.userMessage._id,
+           _id: data.userMessage._id,
+           imageUrl: data.userMessage.imageUrl || uploadedImageUrl || msg.imageUrl // ← עדכון
+        };
+      }
+      return msg;
+    }));
+
+    // Add AI Response
+    const assistantMessage = {
+      ...data.aiMessage,
+      type: "assistant", 
+      id: data.aiMessage._id || Date.now()
     };
 
-    setMessages((prev) => [...prev, optimisticUserMessage]);
-    
-    // Store file reference locally for upload, then clear inputs
-    const fileToUpload = imageFile; 
-    setInputValue("");
-    setImagePreview(null); 
-    setImageFile(null);
+    setMessages((prev) => [...prev, assistantMessage]);
 
-    setIsLoading(true);
-
-    try {
-      // 2. Chat Session Management
-      let chatId = currentChatId;
-
-      if (!chatId) {
-        const categoryId = selectedCategory?.id || "general";
-        const newChat = await createChatSession(categoryId); 
-        chatId = newChat._id || newChat.id; 
-        setCurrentChatId(chatId); 
-      }
-
-      // 3. Upload Image (if selected)
-      let uploadedImageUrl = null;
-      if (fileToUpload) {
-        // Upload to Cloudinary and get the secure URL
-        uploadedImageUrl = await uploadChatImage(fileToUpload);
-      }
-
-      // 4. Send Message to Backend
-      // Pass the text and the real Cloudinary URL
-      const data = await sendChatMessage(chatId, textToSend, uploadedImageUrl); 
-
-      // 5. Update the Temporary ID with the Real ID from Server
-      // Also update the image URL to the remote one (optional, but good for consistency)
-      setMessages((prev) => prev.map((msg) => {
-        if (msg.id === tempId) {
-          return {
-             ...msg,
-             id: data.userMessage._id, // Real MongoDB ID
-             _id: data.userMessage._id,
-             imageUrl: data.userMessage.imageUrl || msg.imageUrl
-          };
-        }
-        return msg;
-      }));
-
-      // 6. Add AI Response
-      const assistantMessage = {
-        ...data.aiMessage,
-        type: "assistant", 
-        id: data.aiMessage._id || Date.now()
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-
-    } catch (error) {
+  } catch (error) {
       console.error("Backend Error:", error);
       
       const errorMessage = {

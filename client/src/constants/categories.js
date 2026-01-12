@@ -1,4 +1,4 @@
-import { Image, MessageCircleWarning, BrainCircuit, Video } from "lucide-react"; 
+import { Image, MessageCircleWarning, BrainCircuit } from "lucide-react"; 
 
 export const CATEGORIES = [
   { 
@@ -15,10 +15,5 @@ export const CATEGORIES = [
     id: "Focus", 
     label: "Focus & Habits", 
     icon: BrainCircuit 
-  },
-  {
-    id: "YouTube",
-    label: "YouTube Insights",
-    icon: Video
-  }
+  } 
 ];

@@ -54,6 +54,8 @@ const sendMessageSchema = Joi.object({
   message: Joi.string().trim().min(1).required().messages({
     "string.empty": "Message cannot be empty",
   }),
+  imageUrl: Joi.string().uri().allow(null, '').optional(),
+  hasImage: Joi.boolean().default(false),
 }).options({ stripUnknown: true });
 
 

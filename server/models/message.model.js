@@ -16,6 +16,10 @@ const messageSchema = new mongoose.Schema({
     type: String, 
     required: true,
   },
+  imageUrl: {        // ← הוספה חדשה
+    type: String,
+    default: null
+  },
   hasImage: { 
     type: Boolean, 
     default: false 

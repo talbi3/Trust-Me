@@ -17,7 +17,7 @@ const config = {
 
   openai: {
     apiKey: process.env.OPENAI_API_KEY,
-    model: "gpt-3.5-turbo",
+    model: "gpt-4.0",
     temperature: 0.7,
     max_tokens: 400,
   },

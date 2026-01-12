@@ -29,6 +29,9 @@ const loadSystemPrompt = async (currentTopic) => {
 /**
  * Generates the main response for the chat
  */
+/**
+ * Generates the main response for the chat
+ */
 const generateAIResponse = async (chatHistory, topic, userMetadata) => {
   try {
     const systemInstruction = await loadSystemPrompt(topic);
@@ -37,10 +40,31 @@ const generateAIResponse = async (chatHistory, topic, userMetadata) => {
       ? `\n\nUser metadata (for personalization; do not invent missing fields):\n${JSON.stringify(userMetadata)}`
       : "";
 
-    const messages = chatHistory.map((msg) => ({
-      role: msg.role,
-      content: msg.content,
-    }));
+    // Build messages with image support
+    const messages = chatHistory.map((msg) => {
+      // If message has an image URL, format content as array
+      if (msg.imageUrl) {
+        return {
+          role: msg.role,
+          content: [
+            { type: "text", text: msg.content || "Please analyze this image." },
+            { 
+              type: "image_url", 
+              image_url: { 
+                url: msg.imageUrl,
+                detail: "auto"
+              } 
+            }
+          ]
+        };
+      }
+      
+      // Regular text message - no change
+      return {
+        role: msg.role,
+        content: msg.content,
+      };
+    });
 
     messages.unshift({
       role: "system",
@@ -48,9 +72,10 @@ const generateAIResponse = async (chatHistory, topic, userMetadata) => {
     });
 
     const completion = await openai.chat.completions.create({
-      model: config.openai.model || "gpt-3.5-turbo",
+      model: "gpt-4o",  
       messages,
-      temperature: 0.7, 
+      temperature: 0.7,
+      max_tokens: 1024,
     });
 
     return completion.choices[0].message.content;

@@ -85,10 +85,10 @@ const MessageList = ({ messages, isLoading, onDelete, onEdit }) => {
               
               <div className={`${styles.bubble} ${isUser ? styles.bubbleUser : styles.bubbleAssistant}`}>
                 
-                {/* Image Display */}
-                {message.image && !isEditing && (
-                  <img src={message.image} alt="Uploaded" className={styles.uploadedImage} />
-                )}
+              {/* Image Display */}
+              {message.imageUrl && !isEditing && (
+                <img src={message.imageUrl} alt="Uploaded" className={styles.uploadedImage} />
+              )}
 
                 {/* --- EDIT MODE --- */}
                 {isEditing ? (

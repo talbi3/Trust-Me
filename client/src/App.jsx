@@ -130,11 +130,7 @@ function AppContent() {
         </Routes>
       </main>
 
-      {!isOnboarding && (
-        <footer className={styles.footer}>
-          <p>&copy; 2026 Trust Me</p>
-        </footer>
-      )}
+      
     </div>
   );
 }
