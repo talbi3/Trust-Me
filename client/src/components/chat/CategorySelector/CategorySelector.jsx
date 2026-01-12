@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import PropTypes from 'prop-types';
 import styles from './CategorySelector.module.css';
-import { Sparkles, ShieldCheck, Camera, Target, ChevronRight } from 'lucide-react';
+import { Sparkles, ShieldCheck, Camera, Target, ChevronRight, Youtube} from 'lucide-react';
 import { UserContext } from '../../../context/UserContext';
 
 const CATEGORIES = [
@@ -9,6 +9,7 @@ const CATEGORIES = [
   { id: 'Pictures', label: 'Picture Safety', icon: Camera, color: '#53474F' },
   { id: 'Focus', label: 'Focus Help', icon: Target, color: '#53474F' },
   { id: 'Youtube', label: 'Youtube', icon: Sparkles, color: '#53474F' },
+  { id: 'YouTubeAnalysis', label: 'YouTube Video Check', icon: Youtube, color:'#53474F'}
 ];
 
 const CategorySelector = ({ onSelectCategory }) => {

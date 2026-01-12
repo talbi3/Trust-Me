@@ -26,6 +26,10 @@ const config = {
     clientId: process.env.GOOGLE_CLIENT_ID,
   },
 
+  youtube: {
+  apiKey: process.env.YOUTUBE_API_KEY,
+},
+
 
 };
 

@@ -68,7 +68,7 @@ const googleLogin = asyncHandler(async (req, res) => {
 
   authLogger.info('Google login successful');
   res.status(200).json({
-    user: user.toObject ? user.toObject() : user, // אם זה doc של mongoose
+    user: user.toObject ? user.toObject() : user, 
     needsOnboarding,
     isNewUser,
   });

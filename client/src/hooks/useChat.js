@@ -74,20 +74,45 @@ export const useChat = (activeUserId) => {
     setImageFile(file);
   };
 
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
-    
+  const handleCategorySelect = async (category) => {
+  setSelectedCategory(category);
+  setIsLoading(true);
+
+  try {
+    // ✅ Create chat session immediately with the chosen category
+    const newChat = await createChatSession(category?.id || "general");
+    const chatId = newChat._id || newChat.id;
+    setCurrentChatId(chatId);
+
     // UI Greeting
     const helloMsg = {
       id: Date.now(),
-      role: "assistant", 
-      type: "assistant", 
-      content: `Hi there! I see you want to talk about ${category.label}. I'm here to listen. What's on your mind?`,
+      role: "assistant",
+      type: "assistant",
+      content: `Hi there! I see you want to talk about ${category.label}. What's on your mind?`,
       createdAt: new Date(),
       timestamp: new Date(),
     };
     setMessages([helloMsg]);
-  };
+
+  } catch (err) {
+    console.error("Failed to create chat on category select:", err);
+    setMessages([
+      {
+        id: Date.now(),
+        role: "assistant",
+        type: "assistant",
+        content: "I couldn't start a new chat right now. Please try again.",
+        isError: true,
+        createdAt: new Date(),
+        timestamp: new Date(),
+      },
+    ]);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   /**
    * Load an existing chat session from DB
