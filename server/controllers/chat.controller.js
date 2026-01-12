@@ -3,10 +3,10 @@ import { EntityNotFoundError, createValidationError } from "../utils/errors.js";
 import Chat from "../models/chat.model.js";
 import Message from "../models/message.model.js";
 import UserMetadata from "../models/userMetadata.model.js";
-import { generateAIResponse, generateChatTitle,analyzePictureSafety } from "../services/ai.service.js";
+import { generateAIResponse, generateChatTitle, analyzePictureSafety, analyzeYoutubeVideo } from "../services/ai.service.js";
 import { sendMessageSchema } from "../validations/chat.validation.js";
 import { getYoutubeMetadata } from "../services/youtube.service.js";
-
+import logger from "../utils/logger.js";
 /**
  * Create a new chat session
  */
@@ -72,21 +72,27 @@ const sendMessage = asyncHandler(async (req, res) => {
 
   // 3. Handle YouTube feature (ONLY if category === youtube)
   let finalUserContent = userContent;
+  let youtubeAnalysis = null;
+  let videoMetadata = null;
 
- if ((chat.category || "").toLowerCase() === "youtube") {
-    const meta = await getYoutubeMetadata(userContent);
+  const categoryLower = (chat.category || "").toLowerCase();
+  if (categoryLower === "youtube" || categoryLower === "youtubeanalysis") {
+    videoMetadata = await getYoutubeMetadata(userContent);
 
-    if (meta) {
-      finalUserContent =
-        `Analyze the following YouTube video based ONLY on its metadata.\n` +
-        `Determine if it may contain sensitive or inappropriate content base on user age add on you response the age of user.\n` +
-        `Return a short verdict (safe / caution / unsafe) with 1-2 reasons.\n\n` +
-        `Title: ${meta.title}\n` +
-        `Description: ${meta.description}\n` +
-        `Tags: ${meta.tags.join(", ")}`;
+    if (videoMetadata) {
+      // Get user age for personalized analysis
+      const metaDoc = await UserMetadata.findOne({ userId: req.user._id }).lean();
+      const userAge = metaDoc?.dateOfBirth 
+        ? Math.floor((Date.now() - new Date(metaDoc.dateOfBirth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+        : null;
+
+      // Analyze the video with AI
+      youtubeAnalysis = await analyzeYoutubeVideo(videoMetadata, userAge);
+      
+      // Store original URL as the user message
+      finalUserContent = userContent;
     } else {
-      finalUserContent =
-        "The user tried to send a YouTube link, but it seems invalid. Ask them to paste a valid YouTube URL.";
+      finalUserContent = userContent;
     }
   }
 
@@ -99,10 +105,37 @@ const sendMessage = asyncHandler(async (req, res) => {
     hasImage: hasImage || false,
   });
 
-  // 5. Get full history
+  // 5. Handle YouTube Analysis Response
+  if (youtubeAnalysis) {
+    // Build a friendly summary content
+    const verdictEmoji = youtubeAnalysis.verdict === 'safe' ? '✅' : 
+                         youtubeAnalysis.verdict === 'caution' ? '⚠️' : '🚫';
+    const summaryContent = `${verdictEmoji} **Video Analysis Complete**\n\n${youtubeAnalysis.summary}`;
+
+    // Save YouTube analysis as a special message
+    const aiMessage = await Message.create({
+      chatId,
+      role: "assistant",
+      content: summaryContent,
+      isYoutubeAnalysis: true,
+      youtubeAnalysis: youtubeAnalysis,
+    });
+
+    // Update chat title if this is the first message
+    const history = await Message.find({ chatId }).sort({ createdAt: 1 });
+    if (history.length <= 2) {
+      const videoTitle = videoMetadata.title.substring(0, 30);
+      chat.title = `YouTube: ${videoTitle}...`;
+      await chat.save();
+    }
+
+    return res.status(200).json({ userMessage, aiMessage });
+  }
+
+  // 6. Regular chat flow (non-YouTube or invalid YouTube URL)
   const history = await Message.find({ chatId }).sort({ createdAt: 1 });
 
-  // 6. User metadata
+  // 7. User metadata for regular chat
   const metaDoc = await UserMetadata.findOneAndUpdate(
     { userId: req.user._id },
     { $setOnInsert: { userId: req.user._id } },
@@ -115,27 +148,33 @@ const sendMessage = asyncHandler(async (req, res) => {
     pronouns: metaDoc?.pronouns ?? "",
   };
 
-  // 7. Parallel AI tasks
-  const tasks = [generateAIResponse(history, chat.category, userMetadata)];
+  // Handle invalid YouTube URL case
+  let aiContent;
+  if ((categoryLower === "youtube" || categoryLower === "youtubeanalysis") && !videoMetadata) {
+    aiContent = "I couldn't find a valid YouTube video from that link. Please paste a YouTube URL like:\n\n• https://www.youtube.com/watch?v=xxxxx\n• https://youtu.be/xxxxx\n\nAnd I'll analyze if it's safe to watch! 🎬";
+  } else {
+    // 8. Parallel AI tasks
+    const tasks = [generateAIResponse(history, chat.category, userMetadata)];
 
-  if (history.length === 1) {
-    tasks.push(generateChatTitle(userContent, chat.category));
+    if (history.length === 1) {
+      tasks.push(generateChatTitle(userContent, chat.category));
+    }
+
+    const results = await Promise.all(tasks);
+    aiContent = results[0];
+    const newTitle = results[1];
+
+    // 9. Update title if needed
+    if (newTitle) {
+      chat.title = newTitle;
+      await chat.save();
+    } else if (history.length === 1) {
+      chat.title = userContent.substring(0, 30) + "...";
+      await chat.save();
+    }
   }
 
-  const results = await Promise.all(tasks);
-  const aiContent = results[0];
-  const newTitle = results[1];
-
-  // 8. Update title if needed
-  if (newTitle) {
-    chat.title = newTitle;
-    await chat.save();
-  } else if (history.length === 1) {
-    chat.title = userContent.substring(0, 30) + "...";
-    await chat.save();
-  }
-
-  // 9. Save assistant message
+  // 10. Save assistant message
   const aiMessage = await Message.create({
     chatId,
     role: "assistant",

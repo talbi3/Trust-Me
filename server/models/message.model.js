@@ -28,13 +28,22 @@ const messageSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  // For AI detection analysis results
+  // For AI detection analysis results (Pictures category)
   isAnalysisResult: {
     type: Boolean,
     default: false
   },
   safetyAnalysis: {
     type: mongoose.Schema.Types.Mixed,  // Stores the full analysis object
+    default: null
+  },
+  // For YouTube analysis results
+  isYoutubeAnalysis: {
+    type: Boolean,
+    default: false
+  },
+  youtubeAnalysis: {
+    type: mongoose.Schema.Types.Mixed,  // Stores { verdict, reasons, videoMetadata }
     default: null
   }
 

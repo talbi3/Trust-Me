@@ -4,6 +4,7 @@ import { Sparkles, User, Pencil, Trash2, X, Check } from 'lucide-react';
 import styles from './MessageList.module.css';
 import TextToSpeech from '../../common/TextToSpeech/TextToSpeech.jsx';
 import AIDetectionSlider from '../AIDetectionSlider/AIDetectionSlider.jsx';
+import YouTubeAnalysisCard from '../YouTubeAnalysisCard/YouTubeAnalysisCard.jsx';
 
 // Function to convert URLs in text to clickable links
 const linkifyText = (text) => {
@@ -84,7 +85,7 @@ const MessageList = ({ messages, isLoading, onDelete, onEdit }) => {
             {/* Content Wrapper */}
             <div className={styles.contentWrapper}>
               
-              <div className={`${styles.bubble} ${isUser ? styles.bubbleUser : styles.bubbleAssistant} ${message.isAnalysisResult && message.safetyAnalysis ? styles.bubbleAnalysis : ''}`}>
+              <div className={`${styles.bubble} ${isUser ? styles.bubbleUser : styles.bubbleAssistant} ${message.isAnalysisResult && message.safetyAnalysis ? styles.bubbleAnalysis : ''} ${message.isYoutubeAnalysis && message.youtubeAnalysis ? styles.bubbleYoutube : ''}`}>
                 
               {/* Image Display */}
               {message.imageUrl && !isEditing && (
@@ -114,13 +115,19 @@ const MessageList = ({ messages, isLoading, onDelete, onEdit }) => {
                 ) : (
                   /* --- VIEW MODE --- */
                   <>
-                    {/* AI Detection Slider for analysis results */}
+                    {/* AI Detection Slider for Pictures analysis results */}
                     {message.isAnalysisResult && message.safetyAnalysis && (
                       <AIDetectionSlider safetyAnalysis={message.safetyAnalysis} />
                     )}
                     
-                    {/* Regular text content (hidden if we have the slider) */}
-                    {!(message.isAnalysisResult && message.safetyAnalysis) && (
+                    {/* YouTube Analysis Card for YouTube analysis results */}
+                    {message.isYoutubeAnalysis && message.youtubeAnalysis && (
+                      <YouTubeAnalysisCard youtubeAnalysis={message.youtubeAnalysis} />
+                    )}
+                    
+                    {/* Regular text content (hidden if we have special UI cards) */}
+                    {!(message.isAnalysisResult && message.safetyAnalysis) && 
+                     !(message.isYoutubeAnalysis && message.youtubeAnalysis) && (
                       <p className={styles.text}>
                         {/* Using linkifyText helper here */}
                         {linkifyText(message.content)}

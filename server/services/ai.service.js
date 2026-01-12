@@ -188,8 +188,87 @@ const generateChatTitle = async (userMessage, topic) => {
 };
 
 
+/**
+ * Analyzes YouTube video metadata and returns structured safety verdict
+ */
+const analyzeYoutubeVideo = async (videoMetadata, userAge) => {
+  try {
+    const systemPrompt = `You are a content safety analyst for a child/teen safety app.
+Analyze the YouTube video metadata and determine if it's appropriate for the user.
+User age: ${userAge || 'unknown (assume teenager)'}
+
+IMPORTANT: Return your response as valid JSON with this exact structure:
+{
+  "verdict": "safe" | "caution" | "unsafe",
+  "reasons": ["reason 1", "reason 2"],
+  "summary": "brief explanation"
+}
+
+Guidelines:
+- "safe": Content is appropriate for the user's age
+- "caution": Some elements may need parental guidance
+- "unsafe": Content is not recommended for the user's age
+
+Consider: violence, mature themes, inappropriate language, misleading content, age-restricted topics.`;
+
+    const userMessage = `Analyze this YouTube video:
+Title: ${videoMetadata.title}
+Channel: ${videoMetadata.channelTitle}
+Description: ${videoMetadata.description?.substring(0, 500) || 'No description'}
+Tags: ${(videoMetadata.tags || []).slice(0, 15).join(', ') || 'No tags'}`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userMessage }
+      ],
+      temperature: 0.3,
+      max_tokens: 512,
+    });
+
+    const responseText = completion.choices[0].message.content;
+    
+    // Clean and parse JSON response
+    let cleanedResponse = responseText
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```$/i, '')
+      .trim();
+    
+    const analysis = JSON.parse(cleanedResponse);
+    
+    return {
+      verdict: analysis.verdict || 'caution',
+      reasons: analysis.reasons || [],
+      summary: analysis.summary || '',
+      videoMetadata: {
+        videoId: videoMetadata.videoId,
+        title: videoMetadata.title,
+        channelTitle: videoMetadata.channelTitle,
+        description: videoMetadata.description?.substring(0, 200),
+        tags: videoMetadata.tags?.slice(0, 10)
+      }
+    };
+
+  } catch (error) {
+    logger.error(`YouTube Analysis Error: ${error.message}`);
+    // Return a safe fallback
+    return {
+      verdict: 'caution',
+      reasons: ['Could not fully analyze the video'],
+      summary: 'Analysis was inconclusive. Please review with a parent or guardian.',
+      videoMetadata: {
+        videoId: videoMetadata.videoId,
+        title: videoMetadata.title,
+        channelTitle: videoMetadata.channelTitle
+      }
+    };
+  }
+};
+
 export { 
     generateAIResponse, 
     generateChatTitle,
     analyzePictureSafety,
+    analyzeYoutubeVideo,
 };

@@ -137,7 +137,10 @@ export const useChat = (activeUserId) => {
         imageUrl: msg.imageUrl || null,
         // Preserve analysis result flags for Picture Safety chat
         isAnalysisResult: msg.isAnalysisResult || false,
-        safetyAnalysis: msg.safetyAnalysis || null
+        safetyAnalysis: msg.safetyAnalysis || null,
+        // Preserve YouTube analysis flags
+        isYoutubeAnalysis: msg.isYoutubeAnalysis || false,
+        youtubeAnalysis: msg.youtubeAnalysis || null
       }));
 
       // 4. Update State
@@ -293,7 +296,10 @@ const handleSendMessage = async (overrideText = null) => {
     const assistantMessage = {
       ...data.aiMessage,
       type: "assistant", 
-      id: data.aiMessage._id || Date.now()
+      id: data.aiMessage._id || Date.now(),
+      // Preserve YouTube analysis data if present
+      isYoutubeAnalysis: data.aiMessage.isYoutubeAnalysis || false,
+      youtubeAnalysis: data.aiMessage.youtubeAnalysis || null
     };
 
     setMessages((prev) => [...prev, assistantMessage]);
