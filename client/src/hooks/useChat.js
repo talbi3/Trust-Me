@@ -5,9 +5,46 @@ import {
   getChatHistory, 
   deleteChatMessage, 
   editChatMessage,
-  uploadChatImage // Make sure to export this from chatService.js
+  uploadChatImage,
+  analyzeImageSafety,
+  saveAnalysisMessage
 } from "../services/chatService"; 
 import { CATEGORIES } from "../constants/categories.js";
+
+
+// Helper function to build a user-friendly analysis message
+const buildAnalysisMessage = (analysis) => {
+  const { aiGeneratedProbability, confidence, summary, issuesFound } = analysis;
+  
+  let emoji = "✅";
+  let status = "The image appears to be authentic";
+  
+  if (aiGeneratedProbability > 70) {
+    emoji = "⚠️";
+    status = "This image may be AI-generated (fake)";
+  } else if (aiGeneratedProbability > 40) {
+    emoji = "🤔";
+    status = "Cannot determine with certainty";
+  }
+  
+  let message = `${emoji} **Image Analysis Results:**\n\n`;
+  message += `${status}\n`;
+  message += `• AI Probability: ${aiGeneratedProbability}%\n`;
+  message += `• Confidence Level: ${confidence}\n\n`;
+  
+  if (summary) {
+    message += `📝 ${summary}\n\n`;
+  }
+  
+  if (issuesFound && issuesFound.length > 0) {
+    message += `🔍 Issues Detected:\n`;
+    issuesFound.forEach((issue) => {
+      message += `• ${issue.description}\n`;
+    });
+  }
+  
+  return message;
+};
 
 export const useChat = (activeUserId) => {
   // --- State ---
@@ -72,7 +109,10 @@ export const useChat = (activeUserId) => {
         type: msg.role === 'user' ? 'user' : 'assistant',
         // Ensure we have a valid ID for React keys
         id: msg._id || msg.id || Date.now(),
-        imageUrl: msg.imageUrl || null
+        imageUrl: msg.imageUrl || null,
+        // Preserve analysis result flags for Picture Safety chat
+        isAnalysisResult: msg.isAnalysisResult || false,
+        safetyAnalysis: msg.safetyAnalysis || null
       }));
 
       // 4. Update State
@@ -115,13 +155,12 @@ const handleSendMessage = async (overrideText = null) => {
 
   const tempId = Date.now(); 
 
-  // Optimistic UI Update - שימוש ב-imageUrl
   const optimisticUserMessage = {
     id: tempId, 
     role: "user",
     type: "user", 
     content: textToSend, 
-    imageUrl: imagePreview, // ← שימוש ב-imageUrl (תצוגה מקומית זמנית)
+    imageUrl: imagePreview,  
     createdAt: new Date(),
     timestamp: new Date(), 
   };
@@ -147,12 +186,70 @@ const handleSendMessage = async (overrideText = null) => {
 
     // Upload Image (if selected)
     let uploadedImageUrl = null;
-    if (fileToUpload) {
-      uploadedImageUrl = await uploadChatImage(fileToUpload);
+    let safetyAnalysis = null;
+      if (fileToUpload) {
+      try {
+        uploadedImageUrl = await uploadChatImage(fileToUpload);
+      } catch (uploadError) {
+        console.error("Image upload failed:", uploadError);
+        const errorMsg = uploadError?.response?.data?.error || "Failed to upload image. Please try a different image format (JPG, PNG, WEBP, GIF).";
+        const uploadErrorMessage = {
+          id: Date.now() + 1,
+          role: "assistant",
+          type: "assistant",
+          content: `❌ **Upload Error:** ${errorMsg}`,
+          isError: true,
+          createdAt: new Date(),
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, uploadErrorMessage]);
+        setIsLoading(false);
+        return;
+      }
+      // Only run AI detection for "Pictures" category
+      if (selectedCategory?.id === "Pictures") {
+        safetyAnalysis = await analyzeImageSafety(uploadedImageUrl);
+        console.log("Safety Analysis:", safetyAnalysis);
+        
+        const analysisContent = buildAnalysisMessage(safetyAnalysis);
+        
+        // Add analysis result as a chat message (optimistic UI)
+        const tempAnalysisId = Date.now() + 1;
+        const analysisMessage = {
+          id: tempAnalysisId,
+          role: "assistant",
+          type: "assistant",
+          isAnalysisResult: true,
+          content: analysisContent,
+          safetyAnalysis: safetyAnalysis,
+          createdAt: new Date(),
+          timestamp: new Date(),
+        };
+        
+        setMessages((prev) => [...prev, analysisMessage]);
+        
+        // Save analysis message to database
+        try {
+          const savedAnalysis = await saveAnalysisMessage(chatId, analysisContent, safetyAnalysis);
+          // Update temp ID with real DB ID
+          setMessages((prev) => prev.map((msg) => 
+            msg.id === tempAnalysisId 
+              ? { ...msg, id: savedAnalysis._id, _id: savedAnalysis._id }
+              : msg
+          ));
+        } catch (err) {
+          console.error("Failed to save analysis message:", err);
+        }
+        
+        // If no text was provided, skip the chat message - analysis is enough
+        if (!textToSend.trim()) {
+          setIsLoading(false);
+          return;
+        }
+      }
     }
-
     // Send Message to Backend with the Cloudinary URL
-    const data = await sendChatMessage(chatId, textToSend, uploadedImageUrl); 
+    const data = await sendChatMessage(chatId, textToSend, uploadedImageUrl);
 
     // Update the Temporary ID with Real ID & Real Image URL
     setMessages((prev) => prev.map((msg) => {

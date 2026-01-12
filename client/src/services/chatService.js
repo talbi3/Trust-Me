@@ -127,3 +127,34 @@ export const uploadChatImage = async (file) => {
 };
 
 
+/**
+ * Analyze image for AI-generated content
+ */
+export const analyzeImageSafety = async (imageUrl, topic = "Picture Safety") => {
+  try {
+    const response = await api.post(`${BASE_URL}/analyze-image`, {
+      imageUrl,
+      topic
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to analyze image:", error);
+    throw error;
+  }
+};
+
+/**
+ * Save analysis result message to database
+ */
+export const saveAnalysisMessage = async (chatId, content, safetyAnalysis) => {
+  try {
+    const response = await api.post(`${BASE_URL}/${chatId}/analysis-message`, {
+      content,
+      safetyAnalysis
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to save analysis message:", error);
+    throw error;
+  }
+};

@@ -8,17 +8,38 @@ const router = express.Router();
 // multer in-memory (no local uploads folder)
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB (increased for larger images)
   fileFilter: (req, file, cb) => {
-    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    // Extended format support including GIF, AVIF, HEIC
+    const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif", "image/heic", "image/heif"];
     if (!allowed.includes(file.mimetype)) {
-      return cb(new Error("Only JPG/PNG/WEBP images are allowed"));
+      logger.error(`Rejected file type: ${file.mimetype} (${file.originalname})`);
+      return cb(new Error(`File type ${file.mimetype} not allowed. Supported: JPG, PNG, WEBP, GIF, AVIF, HEIC`));
     }
     cb(null, true);
   },
 });
 
-router.post("/profile-picture", upload.single("image"), async (req, res) => {
+// Wrapper to catch multer errors properly
+const uploadWithErrorHandling = (uploadMiddleware) => {
+  return (req, res, next) => {
+    uploadMiddleware(req, res, (err) => {
+      if (err instanceof multer.MulterError) {
+        logger.error(`Multer error: ${err.code} - ${err.message}`);
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ error: "File too large. Maximum size is 10MB" });
+        }
+        return res.status(400).json({ error: err.message });
+      } else if (err) {
+        logger.error(`Upload error: ${err.message}`);
+        return res.status(400).json({ error: err.message });
+      }
+      next();
+    });
+  };
+};
+
+router.post("/profile-picture", uploadWithErrorHandling(upload.single("image")), async (req, res) => {
   try {
     if (!req.file) {
       logger.error("No file uploaded");
@@ -54,7 +75,7 @@ router.post("/profile-picture", upload.single("image"), async (req, res) => {
   }
 });
 
-router.post("/chat-image", upload.single("image"), async (req, res) => {
+router.post("/chat-image", uploadWithErrorHandling(upload.single("image")), async (req, res) => {
   try {
     if (!req.file) {
       logger.error("No chat file uploaded");

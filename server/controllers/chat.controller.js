@@ -4,7 +4,7 @@ import logger from "../utils/logger.js";
 import Chat from "../models/chat.model.js";
 import Message from "../models/message.model.js";
 import UserMetadata from "../models/userMetadata.model.js";
-import { generateAIResponse, generateChatTitle } from "../services/ai.service.js";
+import { generateAIResponse, generateChatTitle,analyzePictureSafety } from "../services/ai.service.js";
 import { sendMessageSchema } from "../validations/chat.validation.js";
 
 
@@ -261,6 +261,47 @@ const deleteMessage = asyncHandler(async (req, res) => {
 });
 
 
+const analyzeImageSafety = asyncHandler(async (req, res) => {
+  const { imageUrl, topic } = req.body;
+
+  if (!imageUrl) {
+    throw createValidationError("imageUrl is required");
+  }
+
+  const analysis = await analyzePictureSafety(imageUrl, topic || "Picture Safety");
+
+  res.status(200).json(analysis);
+});
+
+
+/**
+ * Save an analysis result message to the database
+ */
+const saveAnalysisMessage = asyncHandler(async (req, res) => {
+  const { id: chatId } = req.params;
+  const { content, safetyAnalysis } = req.body;
+
+  // Verify chat ownership
+  const chat = await Chat.findOne({ _id: chatId, userId: req.user._id });
+  if (!chat) {
+    throw new EntityNotFoundError("Chat not found");
+  }
+
+  // Create the analysis message
+  const analysisMessage = await Message.create({
+    chatId,
+    role: "assistant",
+    content: content,
+    isAnalysisResult: true,
+    safetyAnalysis: safetyAnalysis
+  });
+
+  logger.info(`Analysis message saved for chat: ${chatId}`);
+
+  res.status(201).json(analysisMessage);
+});
+
+
 export {
   createNewChat,
   getAllChats,
@@ -268,5 +309,7 @@ export {
   sendMessage,
   deleteChat,
   editMessage,
-  deleteMessage
+  deleteMessage,
+  analyzeImageSafety,
+  saveAnalysisMessage
 };

@@ -29,13 +29,13 @@ export const FEATURES_BY_CATEGORY = {
     },
     { 
       key: "report_bullying", 
-      label: "🚩 I want to report bullying", 
-      message: "How do I report a message that was hurtful or scary?" 
+      label: "🚩 I want to report online bullying", 
+      message: "I’m going through online bullying. Can you help me with the first steps?"
     },
     { 
       key: "unsafe_chat", 
       label: "🛑 I feel unsafe in a chat", 
-      message: "Someone keeps sending me messages that worry me. Can you help me stay safe?" 
+      message: "Someone keeps sending me messages that make me feel unsafe. How can I stay safe?" 
     }
   ],
 

@@ -16,7 +16,7 @@ const messageSchema = new mongoose.Schema({
     type: String, 
     required: true,
   },
-  imageUrl: {        // ← הוספה חדשה
+  imageUrl: {
     type: String,
     default: null
   },
@@ -27,6 +27,15 @@ const messageSchema = new mongoose.Schema({
   isEdited: {
     type: Boolean,
     default: false
+  },
+  // For AI detection analysis results
+  isAnalysisResult: {
+    type: Boolean,
+    default: false
+  },
+  safetyAnalysis: {
+    type: mongoose.Schema.Types.Mixed,  // Stores the full analysis object
+    default: null
   }
 
 }, { timestamps: true }); 

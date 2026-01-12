@@ -26,9 +26,76 @@ const loadSystemPrompt = async (currentTopic) => {
   }
 };
 
+// Load picture safety prompt (same pattern as loadSystemPrompt)
+const loadPictureSafetyPrompt = async (topic) => {
+  try {
+    const filePath = path.join(__dirname, 'pictureSafetyPrompt.txt');
+    let prompt = await fsPromises.readFile(filePath, 'utf-8');
+    const topicToInject = topic || "Picture Safety";
+    prompt = prompt.replace('{{TOPIC}}', topicToInject);
+    return prompt;
+  } catch (error) {
+    logger.error(`Error reading picture safety prompt: ${error.message}`);
+    return "You are an image forensics analyst. Analyze if the image is AI-generated.";
+  }
+};
+
 /**
- * Generates the main response for the chat
+ * Analyzes an image for AI-generated indicators
  */
+const analyzePictureSafety = async (imageUrl, topic) => {
+  try {
+    const systemPrompt = await loadPictureSafetyPrompt(topic);
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: systemPrompt },
+        {
+          role: "user",
+          content: [
+            { type: "text", text: "Analyze this image and identify if it was created by AI or a real person."},
+            { 
+              type: "image_url", 
+              image_url: { url: imageUrl, detail: "high" } 
+            }
+          ]
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 1024,
+    });
+
+    const responseText = completion.choices[0].message.content;
+    
+    // DEBUG: Log raw response to see what GPT actually returned
+    console.log("🔍 Raw GPT response:", responseText);
+    
+    try {
+      // Remove markdown code blocks: ```json or ``` at start/end
+      let cleanedResponse = responseText
+        .replace(/^```(?:json)?\s*/i, '')  // Remove opening ```json or ```
+        .replace(/\s*```$/i, '')            // Remove closing ```
+        .trim();
+      
+      return JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      logger.error(`Failed to parse picture safety response: ${parseError.message}`);
+      logger.error(`Raw response was: ${responseText}`);
+      return {
+        aiGeneratedProbability: 50,
+        humanGeneratedProbability: 50,
+        confidence: "low",
+        issuesFound: [],
+        summary: "Could not analyze the picture - please try again"
+      };
+    }
+
+  } catch (error) {
+    logger.error(`Picture Safety Analysis Error: ${error.message}`);
+    throw error;
+  }
+};
 /**
  * Generates the main response for the chat
  */
@@ -124,4 +191,5 @@ const generateChatTitle = async (userMessage, topic) => {
 export { 
     generateAIResponse, 
     generateChatTitle,
+    analyzePictureSafety,
 };

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Sparkles, User, Pencil, Trash2, X, Check } from 'lucide-react';
 import styles from './MessageList.module.css';
 import TextToSpeech from '../../common/TextToSpeech/TextToSpeech.jsx';
+import AIDetectionSlider from '../AIDetectionSlider/AIDetectionSlider.jsx';
 
 // Function to convert URLs in text to clickable links
 const linkifyText = (text) => {
@@ -83,7 +84,7 @@ const MessageList = ({ messages, isLoading, onDelete, onEdit }) => {
             {/* Content Wrapper */}
             <div className={styles.contentWrapper}>
               
-              <div className={`${styles.bubble} ${isUser ? styles.bubbleUser : styles.bubbleAssistant}`}>
+              <div className={`${styles.bubble} ${isUser ? styles.bubbleUser : styles.bubbleAssistant} ${message.isAnalysisResult && message.safetyAnalysis ? styles.bubbleAnalysis : ''}`}>
                 
               {/* Image Display */}
               {message.imageUrl && !isEditing && (
@@ -113,11 +114,19 @@ const MessageList = ({ messages, isLoading, onDelete, onEdit }) => {
                 ) : (
                   /* --- VIEW MODE --- */
                   <>
-                    <p className={styles.text}>
-                      {/* Using linkifyText helper here */}
-                      {linkifyText(message.content)}
-                      {message.isEdited && <span className={styles.editedLabel}> (edited)</span>}
-                    </p>
+                    {/* AI Detection Slider for analysis results */}
+                    {message.isAnalysisResult && message.safetyAnalysis && (
+                      <AIDetectionSlider safetyAnalysis={message.safetyAnalysis} />
+                    )}
+                    
+                    {/* Regular text content (hidden if we have the slider) */}
+                    {!(message.isAnalysisResult && message.safetyAnalysis) && (
+                      <p className={styles.text}>
+                        {/* Using linkifyText helper here */}
+                        {linkifyText(message.content)}
+                        {message.isEdited && <span className={styles.editedLabel}> (edited)</span>}
+                      </p>
+                    )}
                     
                     {/* Footer: TTS + Actions */}
                     <div className={styles.bubbleFooter}>

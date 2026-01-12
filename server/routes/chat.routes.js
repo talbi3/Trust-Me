@@ -7,7 +7,9 @@ import {
   sendMessage,
   deleteChat,
   editMessage,
-  deleteMessage
+  deleteMessage,
+  analyzeImageSafety,
+  saveAnalysisMessage
 } from '../controllers/chat.controller.js';
 
 const router = express.Router();
@@ -34,6 +36,12 @@ router.post('/new', createNewChat);
 
 // Sending a message to an existing chat and receiving a response from openAI
 router.post('/:id/message', sendMessage);
+
+// Analyzing the safety of an image
+router.post('/analyze-image', analyzeImageSafety);
+
+// Save analysis result message to database
+router.post('/:id/analysis-message', saveAnalysisMessage);
 
 // Deleting a chat session and all its associated messages
 router.delete('/:id', deleteChat);
