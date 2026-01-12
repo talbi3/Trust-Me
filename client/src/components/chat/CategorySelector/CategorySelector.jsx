@@ -9,7 +9,6 @@ const CATEGORIES = [
   { id: 'Pictures', label: 'Picture Safety', icon: Camera, color: '#53474F' },
   { id: 'Focus', label: 'Focus Help', icon: Target, color: '#53474F' },
   { id: 'Youtube', label: 'Youtube', icon: Sparkles, color: '#53474F' },
-  { id: 'YouTubeAnalysis', label: 'YouTube Video Check', icon: Youtube, color:'#53474F'}
 ];
 
 const CategorySelector = ({ onSelectCategory }) => {
