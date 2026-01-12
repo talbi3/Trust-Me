@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Sparkles,User } from 'lucide-react';
+import { Sparkles, User, Pencil, Trash2, X, Check } from 'lucide-react';
 import styles from './MessageList.module.css';
-import TextToSpeech from '../../common/TextToSpeech/TextToSpeech.jsx'; // Make sure this path is correct
+import TextToSpeech from '../../common/TextToSpeech/TextToSpeech.jsx';
 
 // Function to convert URLs in text to clickable links
 const linkifyText = (text) => {
@@ -27,60 +27,138 @@ const linkifyText = (text) => {
   });
 };
 
-const MessageList = ({ messages, isLoading }) => {
+const MessageList = ({ messages, isLoading, onDelete, onEdit }) => {
   const messagesEndRef = useRef(null);
+  
+  // --- Local State for Editing ---
+  const [editingId, setEditingId] = useState(null);
+  const [editContent, setEditContent] = useState("");
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, isLoading]);
+    if (!editingId) {
+      scrollToBottom();
+    }
+  }, [messages, isLoading, editingId]);
+
+  // --- Handlers ---
+  const handleStartEdit = (message) => {
+    setEditingId(message.id || message._id);
+    setEditContent(message.content);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditContent("");
+  };
+
+  const handleSaveEdit = (id) => {
+    if (editContent.trim()) {
+      onEdit(id, editContent); 
+    }
+    setEditingId(null);
+  };
 
   return (
     <div className={styles.container}>
-      {messages.map((message) => (
-        <div
-          key={message.id}
-          className={`${styles.row} ${message.type === 'user' ? styles.rowUser : styles.rowAssistant}`}
-        >
-          {/* Avatar */}
-          <div className={`${styles.avatar} ${message.type === 'user' ? styles.avatarUser : styles.avatarAssistant}`}>
-            {message.type === 'user' ? 'You' : <Sparkles size={16} />}
-          <User size={20} strokeWidth={2.5} />
-          </div>
+      {messages.map((message) => {
+        // Check if the message belongs to the user
+        const isUser = message.type === 'user';
+        const isEditing = editingId === (message.id || message._id);
 
-          {/* Bubble */}
-          <div className={styles.contentWrapper}>
-            <div className={`${styles.bubble} ${message.type === 'user' ? styles.bubbleUser : styles.bubbleAssistant}`}>
-              
-              {/* Image Display */}
-              {message.image && (
-                <img src={message.image} alt="Uploaded" className={styles.uploadedImage} />
-              )}
-              
-              {/* Text Content + Speaker Button */}
-              {message.content && (
-                <>
-                  <p className={styles.text}>{linkifyText(message.content)}</p>
-
-                  {/* ✅ INSERTED HERE: Speaker Button */}
-                  <div style={{ marginTop: '5px', display: 'flex', justifyContent: 'flex-end', opacity: 0.7 }}>
-                    <TextToSpeech text={message.content} />
-                  </div>
-                </>
-              )}
-
+        return (
+          <div
+            key={message.id || message._id}
+            className={`${styles.row} ${isUser ? styles.rowUser : styles.rowAssistant}`}
+          >
+            {/* Avatar */}
+            <div className={`${styles.avatar} ${isUser ? styles.avatarUser : styles.avatarAssistant}`}>
+              {!isUser && <Sparkles size={16} />}
+              {isUser && <User size={20} strokeWidth={2.5} />}
             </div>
-            
-            <span className={styles.timestamp}>
-              {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </span>
-          </div>
-        </div>
-      ))}
 
+            {/* Content Wrapper */}
+            <div className={styles.contentWrapper}>
+              
+              <div className={`${styles.bubble} ${isUser ? styles.bubbleUser : styles.bubbleAssistant}`}>
+                
+                {/* Image Display */}
+                {message.image && !isEditing && (
+                  <img src={message.image} alt="Uploaded" className={styles.uploadedImage} />
+                )}
+
+                {/* --- EDIT MODE --- */}
+                {isEditing ? (
+                  <div className={styles.editContainer}>
+                    <textarea 
+                      className={styles.editInput}
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      autoFocus
+                      // Dynamic height
+                      rows={Math.max(2, Math.ceil(editContent.length / 40))} 
+                    />
+                    <div className={styles.editActions}>
+                      <button onClick={() => handleSaveEdit(message.id || message._id)} className={styles.actionBtnSave}>
+                        <Check size={14} />
+                      </button>
+                      <button onClick={handleCancelEdit} className={styles.actionBtnCancel}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* --- VIEW MODE --- */
+                  <>
+                    <p className={styles.text}>
+                      {/* Using linkifyText helper here */}
+                      {linkifyText(message.content)}
+                      {message.isEdited && <span className={styles.editedLabel}> (edited)</span>}
+                    </p>
+                    
+                    {/* Footer: TTS + Actions */}
+                    <div className={styles.bubbleFooter}>
+                       {/* Everyone can hear TTS */}
+                       <TextToSpeech text={message.content} />
+
+                       {/* Action Buttons - Only for the User! */}
+                       {isUser && (
+                         <div className={styles.messageActions}>
+                            <button 
+                              className={styles.iconButton} 
+                              onClick={() => handleStartEdit(message)}
+                              title="Edit"
+                            >
+                              <Pencil size={12} />
+                            </button>
+                            
+                            <button 
+                              className={styles.iconButton} 
+                              onClick={() => onDelete(message.id || message._id)}
+                              title="Delete"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                         </div>
+                       )}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Timestamp */}
+              <span className={styles.timestamp}>
+                {new Date(message.timestamp || message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          </div>
+        );
+      })}
+
+      {/* Loading Indicator */}
       {isLoading && (
         <div className={`${styles.row} ${styles.rowAssistant}`}>
           <div className={`${styles.avatar} ${styles.avatarAssistant}`}>
@@ -100,7 +178,9 @@ const MessageList = ({ messages, isLoading }) => {
 
 MessageList.propTypes = {
   messages: PropTypes.arrayOf(PropTypes.object).isRequired,
-  isLoading: PropTypes.bool
+  isLoading: PropTypes.bool,
+  onDelete: PropTypes.func.isRequired,
+  onEdit: PropTypes.func.isRequired    
 };
 
 export default MessageList;

@@ -11,7 +11,7 @@ const ChatInput = ({
   onSendMessage, 
   isLoading, 
   imagePreview, 
-  setImagePreview,
+  setImagePreview, // This is actually 'handleImageSelect' from useChat
   isListening,
   onToggleListening
 }) => {
@@ -26,14 +26,22 @@ const ChatInput = ({
     }
   };
 
+  // --- FIX STARTS HERE ---
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
+    // Validate file type
     if (!file || !file.type.startsWith('image/')) return;
 
-    const reader = new FileReader();
-    reader.onload = () => setImagePreview(reader.result);
-    reader.readAsDataURL(file);
+    // ERROR WAS HERE: 
+    // Previously, you used FileReader to create a string. 
+    // Now, we pass the raw File object directly to useChat.
+    // useChat will handle creating the preview URL and storing the file for upload.
+    setImagePreview(file);
+
+    // Reset the input so the same file can be selected again if deleted
+    e.target.value = ''; 
   };
+  // --- FIX ENDS HERE ---
 
   const handleEmojiSelect = (emoji) => {
     setInputValue(prev => prev + emoji);
@@ -132,7 +140,7 @@ ChatInput.propTypes = {
   onSendMessage: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
   imagePreview: PropTypes.string,
-  setImagePreview: PropTypes.func,
+  setImagePreview: PropTypes.func, // In this case, it's a function accepting a File
   isListening: PropTypes.bool,
   onToggleListening: PropTypes.func
 };

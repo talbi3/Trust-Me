@@ -28,11 +28,28 @@ function AppContent() {
   const isOnboarding = location.pathname === "/onboarding";
 
   const { user, logout } = useContext(UserContext);
-  console.log("Current User in App:", user);
+
+  // --- NEW: Helper to check if link is active ---
+  const getLinkStyle = (path) => {
+    // Check if the current URL starts with the path (good for /chat vs /chat/123)
+    // Or exact match for others
+    const isActive = path === '/chat' 
+      ? location.pathname.startsWith('/chat') 
+      : location.pathname === path;
+
+    if (isActive) {
+      return { 
+        fontWeight: "bold",      // Visual clue
+        opacity: 0.6,            // Visual clue (dimmed)
+        pointerEvents: "none",   // DISABLES CLICK - The logic you asked for
+        cursor: "default"        // Shows regular cursor instead of hand
+      };
+    }
+    return {}; // Default style
+  };
 
   return (
     <div className={styles.app}>
-      {/* HEADER – logo always visible, nav hidden during onboarding */}
       <header className={styles.appHeader}>
         <Link to="/">
           <img src={projectLogo} alt="Logo" className={styles.appLogo} />
@@ -40,15 +57,29 @@ function AppContent() {
 
         {!isOnboarding && (
           <nav className={styles.appNav}>
-            {user ? (
+            {user && (
               <>
-                <Link to="/profile" className={styles.appLink}>
+                <Link 
+                  to="/profile" 
+                  className={styles.appLink}
+                  style={getLinkStyle('/profile')} 
+                >
                   Profile
                 </Link>
-                <Link to="/settings" className={styles.appLink}>
+
+                <Link 
+                  to="/settings" 
+                  className={styles.appLink}
+                  style={getLinkStyle('/settings')}
+                >
                   Settings
                 </Link>
-                <Link to="/chat" className={styles.appLink}>
+
+                <Link 
+                  to="/chat" 
+                  className={styles.appLink}
+                  style={getLinkStyle('/chat')}
+                >
                   Chat
                 </Link>
 
@@ -59,16 +90,11 @@ function AppContent() {
                   Logout
                 </button>
               </>
-            ) : (
-              <Link to="/login" className={styles.appLink}>
-                Login
-              </Link>
             )}
           </nav>
         )}
       </header>
 
-      {/* MAIN */}
       <main className={styles.main}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -88,6 +114,11 @@ function AppContent() {
             element={user ? <Chat /> : <Login />}
           />
 
+          <Route
+            path="/chat/:id"
+            element={user ? <Chat /> : <Login />}
+          />
+
           <Route path="/history" element={<ChatHistoryPage />} />
 
           <Route path="/login" element={<Login />} />
@@ -99,7 +130,6 @@ function AppContent() {
         </Routes>
       </main>
 
-      {/* FOOTER – hidden during onboarding */}
       {!isOnboarding && (
         <footer className={styles.footer}>
           <p>&copy; 2026 Trust Me</p>
@@ -109,9 +139,6 @@ function AppContent() {
   );
 }
 
-/**
- * App root
- */
 function App() {
   return (
     <BrowserRouter>

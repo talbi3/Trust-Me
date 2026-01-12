@@ -25,7 +25,8 @@ const config = {
   googleAuth: {
     clientId: process.env.GOOGLE_CLIENT_ID,
   },
-   
+
+
 };
 
  

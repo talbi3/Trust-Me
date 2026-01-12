@@ -54,4 +54,40 @@ router.post("/profile-picture", upload.single("image"), async (req, res) => {
   }
 });
 
+router.post("/chat-image", upload.single("image"), async (req, res) => {
+  try {
+    if (!req.file) {
+      logger.error("No chat file uploaded");
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: "trustme/chat/images", // Different folder for chat images
+          resource_type: "image",
+        },
+        (error, uploadResult) => {
+          if (error) return reject(error);
+          resolve(uploadResult);
+        }
+      );
+      stream.end(req.file.buffer);
+    });
+
+    logger.info(`Chat image uploaded to Cloudinary: ${result.secure_url}`);
+
+    return res.json({
+      url: result.secure_url,
+    });
+  } catch (err) {
+    logger.error(`Chat upload failed: ${err.message}`);
+    return res.status(500).json({
+      error: "Upload failed",
+      details: err.message,
+    });
+  }
+});
+
+
 export default router;

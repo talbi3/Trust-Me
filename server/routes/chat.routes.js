@@ -4,7 +4,10 @@ import {
   createNewChat, 
   getAllChats, 
   getChatHistory, 
-  sendMessage 
+  sendMessage,
+  deleteChat,
+  editMessage,
+  deleteMessage
 } from '../controllers/chat.controller.js';
 
 const router = express.Router();
@@ -32,5 +35,13 @@ router.post('/new', createNewChat);
 // Sending a message to an existing chat and receiving a response from openAI
 router.post('/:id/message', sendMessage);
 
+// Deleting a chat session and all its associated messages
+router.delete('/:id', deleteChat);
+
+// Edit a specific message
+router.put('/:id/message/:messageId', editMessage);
+
+// Delete a specific message
+router.delete('/:id/message/:messageId', deleteMessage);
 
 export default router;

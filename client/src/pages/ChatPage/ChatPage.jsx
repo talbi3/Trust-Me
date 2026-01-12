@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState, useCallback, isValidElement, useContext } from "react"; // Added isValidElement
-import { useNavigate } from "react-router-dom";
+
+import { useNavigate, useParams } from "react-router-dom";  
+import { useEffect, useRef, useState, useCallback, isValidElement, useContext } from "react";  
 import { RotateCcw, History as HistoryIcon, Sparkles } from "lucide-react";
 import styles from "./ChatPage.module.css";
 
@@ -22,6 +23,7 @@ import { UserContext } from "../../context/UserContext.jsx";
 
 export default function ChatPage() {
   const navigate = useNavigate();
+  const { id } = useParams();  
   
   // 1. Get User
   const activeUserId = useChatUser();
@@ -39,8 +41,18 @@ export default function ChatPage() {
     setImagePreview,
     handleCategorySelect,
     handleReset,
-    handleSendMessage
+    handleSendMessage,
+    loadExistingChat,
+    handleMessageDelete,
+    handleMessageEdit
   } = useChat(activeUserId);
+
+  // Load chat when ID changes (from URL)
+  useEffect(() => {
+    if (id) {
+      loadExistingChat(id);
+    }
+  }, [id, loadExistingChat]);
 
   // 3. UI Local State (Features Panel)
   const [featuresOpen, setFeaturesOpen] = useState(false);
@@ -146,9 +158,7 @@ export default function ChatPage() {
         <div className={styles.headerRow}>
           <div>
             <h1 className={styles.title}>Trust Me Chat</h1>
-            <p className={styles.subtitle}>
-              Talking about: <strong>{selectedCategory.label}</strong>
-            </p>
+ 
           </div>
         </div>
 
@@ -161,8 +171,7 @@ export default function ChatPage() {
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <span style={{ fontWeight: "bold" }}>Safety Assistant</span>
                 <span className={styles.privacyNote} style={{ marginTop: 2 }}>
-                  Your conversation is private — no sharing, no judgment.
-                </span>
+                 </span>
               </div>
             </div>
 
@@ -200,7 +209,12 @@ export default function ChatPage() {
 
           {/* Messages */}
           <div className={styles.chatContent}>
-            <MessageList messages={messages} isLoading={isLoading} />
+            <MessageList 
+              messages={messages}
+              isLoading={isLoading}
+              onDelete={handleMessageDelete}
+              onEdit={handleMessageEdit}
+           />
           </div>
 
           {/* Input */}

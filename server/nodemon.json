@@ -1,0 +1,9 @@
+{
+  "ignore": [
+    "*.mp3",
+    "*.txt",
+    "*-player-script.js",
+    "temp/*",
+    "uploads/*"
+  ]
+}

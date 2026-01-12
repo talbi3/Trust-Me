@@ -1,9 +1,13 @@
+import { useContext } from "react"; // 1. Import useContext
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../context/UserContext"; // 2. Import UserContext
 import WelcomeMessage from '../../components/chat/WelcomeMessage/WelcomeMessage';
 import styles from './Home.module.css';
 
 const Home = () => {
   const navigate = useNavigate();
+  // 3. Get the user status from context
+  const { user } = useContext(UserContext);
 
   return (
     <div className={styles.container}>
@@ -18,27 +22,25 @@ const Home = () => {
           <WelcomeMessage />
         </div>
 
-        {/* Description */}
-        <p className={styles.description}>
-          Your go-to platform for safety guidance. Manage your profile, 
-          explore features, and chat with our assistant anytime.
-        </p>
-
-        {/* Action Buttons */}
+        {/* Action Buttons - Logic Change Here */}
         <div className={styles.buttonGroup}>
-          <button 
-            className={styles.primaryButton}
-            onClick={() => navigate('/login')}
-          >
-            Log In
-          </button>
-          
-          <button 
-            className={styles.secondaryButton}
-            onClick={() => navigate('/chat')}
-          >
-            Go to Chat
-          </button>
+          {!user ? (
+            /* View for Guest (Not Logged In) */
+            <button 
+              className={styles.primaryButton}
+              onClick={() => navigate('/login')}
+            >
+              Log In
+            </button>
+          ) : (
+            /* View for Logged In User */
+            <button 
+              className={styles.secondaryButton} // Or change to primaryButton if you want it prominent
+              onClick={() => navigate('/chat')}
+            >
+              Go to Chat
+            </button>
+          )}
         </div>
       </div>
     </div>

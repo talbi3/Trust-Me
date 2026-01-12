@@ -56,5 +56,15 @@ export const FEATURES_BY_CATEGORY = {
       label: "📚 I'm too distracted", 
       message: "I'm trying to do homework, but I keep checking apps. How do I stay focused?" 
     }
+  ],
+
+  // YouTubeAnalyzer
+  YouTube: [
+    { 
+      key: "video_insights", 
+      label: "🔍 Analyze video for insights", 
+      message: "Can you analyze this video and provide insights?" 
+    }
   ]
+
 };

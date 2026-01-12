@@ -1,5 +1,3 @@
-//const API_BASE = import.meta.env.VITE_SERVER_API_URL || "http://localhost:5000";
-
 export const API_ROUTES = {
   CHAT: {
     GET_DAYS: `/api/chat-history/days`, 

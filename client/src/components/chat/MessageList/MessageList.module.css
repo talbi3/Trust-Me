@@ -27,31 +27,32 @@
 }
 
 .avatar {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
-  font-weight: bold;
   flex-shrink: 0;
-  display: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .avatarUser {
-  background-color: #333;
+  background-color: #334155;
   color: white;
+  margin-left: 10px;
 }
 
 .avatarAssistant {
   background-color: #2563eb;
   color: white;
+  margin-right: 10px;
 }
 
 .contentWrapper {
   display: flex;
   flex-direction: column;
+  max-width: 100%;
 }
 
 .bubble {
@@ -60,6 +61,8 @@
   font-size: 15px;
   line-height: 1.5;
   white-space: pre-wrap;
+  position: relative;
+  min-width: 140px; /* קצת יותר רחב בשביל הכפתורים */
 }
 
 .bubbleUser {
@@ -68,11 +71,11 @@
   border-bottom-right-radius: 4px;
 }
 
-.bubbleAssistant {background-color: #ffffff; /* Pure White */
-  border: none; /* WhatsApp doesn't use borders */
+.bubbleAssistant {
+  background-color: #ffffff;
   color: #333;
   border-bottom-left-radius: 4px;
-  box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .uploadedImage {
@@ -87,6 +90,13 @@
   margin: 0;
 }
 
+.editedLabel {
+  font-size: 0.75em;
+  opacity: 0.6;
+  font-style: italic;
+  margin-left: 5px;
+}
+
 .timestamp {
   font-size: 11px;
   color: #999;
@@ -94,59 +104,114 @@
   padding: 0 4px;
 }
 
-/* Typing Animation */
-.typingIndicator {
+/* --- ACTIONS FOOTER --- */
+.bubbleFooter {
+  margin-top: 6px;
   display: flex;
-  gap: 4px;
-  padding: 4px 0;
+  justify-content: space-between;
+  align-items: center;
+  /* הסרתי את הבורדר העליון כדי שיראה נקי יותר */
+  padding-top: 2px;
 }
 
-.typingIndicator span {
-  width: 6px;
-  height: 6px;
-  background-color: #ccc;
-  border-radius: 50%;
-  animation: bounce 1.4s infinite ease-in-out both;
+.messageActions {
+  display: flex;
+  gap: 6px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
 }
 
-.typingIndicator span:nth-child(1) { animation-delay: -0.32s; }
-.typingIndicator span:nth-child(2) { animation-delay: -0.16s; }
-
-@keyframes bounce {
-  0%, 80%, 100% { transform: scale(0); }
-  40% { transform: scale(1); }
+/* מראה את האייקונים יותר בבירור כ שעומדים עליהם */
+.messageActions:hover {
+  opacity: 1;
 }
 
-.avatar {
-  width: 40px; /* Slightly larger for better visibility */
-  height: 40px;
-  border-radius: 50%;
+.iconButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  color: inherit;
 }
 
-/* User Icon Style (e.g., Dark Gray or Blue) */
-.avatarUser {
-  background-color: #334155; /* Dark Slate */
+.iconButton:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* --- EDIT MODE STYLING (THE SYMMETRY FIX) --- */
+.editContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.editInput {
+  background: transparent; /* הופך לשקוף כדי להשתלב עם הבועה */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: inherit; /* יורש צבע טקסט מהבועה */
+  border-radius: 8px;
+  padding: 8px;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  resize: none;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box; /* חשוב לסימטריה */
+}
+
+/* פוקוס שונה מעט */
+.editInput:focus {
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(0,0,0,0.1);
+}
+
+.editActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.actionBtnSave, .actionBtnCancel {
+  border: none;
+  border-radius: 50%; /* כפתורים עגולים */
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s;
+}
+
+.actionBtnSave:active, .actionBtnCancel:active {
+    transform: scale(0.95);
+}
+
+.actionBtnSave {
+  background-color: #22c55e;
   color: white;
-  margin-left: 10px; /* Spacing from bubble */
 }
 
-/* Agent Icon Style (e.g., Brand Color / Green) */
-.avatarAssistant {
-  background-color: #2563eb; /* Bright Blue */
+.actionBtnCancel {
+  background-color: rgba(255,255,255,0.2); /* אפור שקוף */
   color: white;
-  margin-right: 10px; /* Spacing from bubble */
 }
 
+.actionBtnCancel:hover {
+    background-color: #ef4444; /* אדום רק בהובר */
+}
 
-
-.audioWrapper {
-  margin-top: 5px; 
-  display: flex; 
-  justify-content: flex-end; 
-  opacity: 0.8;
+/* טיפול בהודעת עוזר (במקרה הנדיר שנערוך אותה) */
+.bubbleAssistant .actionBtnCancel {
+    background-color: #e5e7eb;
+    color: #333;
+}
+.bubbleAssistant .editInput {
+    border-color: #ccc;
 }

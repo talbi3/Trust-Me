@@ -1,14 +1,29 @@
-import PropTypes from 'prop-types';  
+import { useContext } from 'react';
+import PropTypes from 'prop-types';
 import styles from './CategorySelector.module.css';
 import { Sparkles, ShieldCheck, Camera, Target, ChevronRight } from 'lucide-react';
+import { UserContext } from '../../../context/UserContext';
 
 const CATEGORIES = [
-  { id: 'Bullying', label: 'Bullying Support', icon: ShieldCheck, color: '#53474F' }, 
-  { id: 'Pictures', label: 'Picture Safety', icon: Camera, color: '#53474F' },    
-  { id: 'Focus', label: 'Focus Help', icon: Target, color: '#53474F' }            
+  { id: 'Bullying', label: 'Bullying Support', icon: ShieldCheck, color: '#53474F' },
+  { id: 'Pictures', label: 'Picture Safety', icon: Camera, color: '#53474F' },
+  { id: 'Focus', label: 'Focus Help', icon: Target, color: '#53474F' },
+  { id: 'Youtube', label: 'Youtube', icon: Sparkles, color: '#53474F' },
 ];
 
-const CategorySelector = ({ onSelectCategory, userId }) => {
+const CategorySelector = ({ onSelectCategory }) => {
+  // 1. Get user details from Context
+  const { user } = useContext(UserContext);
+
+  // 2. Determine display name logic:
+  // Priority: Nickname -> First Name -> Google Given Name -> Full Name -> "Friend"
+  const displayName =
+    user?.nickName ||
+    user?.firstName ||
+    user?.given_name ||
+    user?.name ||
+    "Friend";
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -35,7 +50,7 @@ const CategorySelector = ({ onSelectCategory, userId }) => {
                   <span className={styles.emoji}>
                     <IconComponent size={24} color={category.color} />
                   </span>
-                  
+
                   <span className={styles.cardLabel}>{category.label}</span>
                 </div>
                 <div className={styles.arrow}><ChevronRight size={20} /></div>
@@ -45,8 +60,9 @@ const CategorySelector = ({ onSelectCategory, userId }) => {
         })}
       </div>
 
+      {/* Footer with Personalized Slogan */}
       <div className={styles.footer}>
-        Connected as <strong>{userId}</strong>
+         Let&apos;s Chat Away, <strong>{displayName}</strong>.
       </div>
     </div>
   );
@@ -54,7 +70,6 @@ const CategorySelector = ({ onSelectCategory, userId }) => {
 
 CategorySelector.propTypes = {
   onSelectCategory: PropTypes.func.isRequired,
-  userId: PropTypes.string
 };
 
 export default CategorySelector;
