@@ -1,53 +1,55 @@
-# QueenB X AppsFlyer - BeSafe Hackathon 2026
+# 🛡️ TRUST ME — Teen‑Focused AI Safety Agent 💙
 
-# **Truse Me chat**
+Short, clear, and focused description of the project and how to run it.
 
-# **Project Overview**
+## 🎯 Overview
+Teen‑focused AI chat agent that provides safe, non‑judgmental guidance. It adapts responses by age/profile and enforces clear boundaries to help prevent bullying and exposure to harmful content.
 
-This project is a digital safety companion designed to protect children and teenagers online.
-It provides AI-based tools that help young users stay safe, manage screen time, avoid risky interactions, and prevent misuse of their personal images.
-Parents also receive clear insights into their child’s digital well-being.
+## ✨ Features
+- 🖼️ Picture Safety: flags risky/AI‑generated images.
+- 📺 YouTube Check: analyzes videos for age‑appropriateness and harmful content.
+- 🧒 Age‑Aware Replies: adjusts tone and guidance to the user’s profile.
+- 🧭 Guided Topics: safe conversation starters for tough moments.
+- 🔒 Privacy Controls: users can clear chat history.
 
----
+## 🛠️ Tech Stack
+- 🧩 React 19, Vite, React Router, Axios
+- ⚙️ Node.js 20, Express 5, MongoDB (Mongoose)
+- 🔐 Google OAuth, ☁️ Cloudinary, 🤖 OpenAI SDK
 
-## **Key Features**
+## ⚡ Quick Start
+1) 🔧 Server env (create server/.env):
+```
+PORT=5000
+CLIENT_URL=http://localhost:3000
+MONGODB_URI=YOUR_MONGODB_URI
+GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET=YOUR_GOOGLE_CLIENT_SECRET
+CLOUDINARY_CLOUD_NAME=YOUR_CLOUD_NAME
+CLOUDINARY_API_KEY=YOUR_API_KEY
+CLOUDINARY_API_SECRET=YOUR_API_SECRET
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+YOUTUBE_API_KEY=YOUR_YOUTUBE_API_KEY
+```
 
-### ** AI Image Protection**
+2) 🧩 Client env (create client/.env):
+```
+VITE_SERVER_API_URL=http://localhost:5000
+VITE_GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID
+```
 
-Upload a photo and receive a protected, AI-watermarked version that looks identical but cannot be easily edited or manipulated by generative AI tools.
+3) ▶️ Install & run:
+```
+# terminal 1
+cd server && npm i && npm run dev
 
----
+# terminal 2
+cd client && npm i && npm run dev
+```
 
-### **⏱ Screen Time Monitoring**
+That’s it: client on http://localhost:3000, server on http://localhost:5000.
 
-Tracks usage of selected social apps using Android’s Usage Stats API.
-Sends alerts when children exceed recommended screen time and provides weekly summaries for parents.
+## 🙏 Thanks
+Mentor: Maya Gershovitz Bar. Team: Or Ishlach, Ori Katz, Miryam Mazor, Tamar.
 
----
 
-### **Focus / Learning Mode**
-
-A distraction-free mode that blocks social media notifications.
-If the child tries to enter a restricted app, they receive a reminder and gentle nudges to stay focused.
-
----
-
-### **🛡 Smart Cyberbullying Detection**
-
-Real-time analysis of messages (text & images) using an AI Agent + Firebase ML Kit.
-Detects harmful or risky content and displays safety prompts like:
-**“Want to take a moment before sending this?”**
-
-In severe cases, it offers quick access to hotline **105**.
-
----
-
-### **One-Tap Bullying Report**
-
-Children can report harmful messages with a single tap.
-The server processes the report using an OpenAI-based Agent and returns:
-
-* A clear summary of the incident
-* Risk level
-* Recommended actions (block, mute, save evidence)
-* Parent-friendly incident overview
