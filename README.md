@@ -47,6 +47,7 @@ cd server && npm i && npm run dev
 cd client && npm i && npm run dev
 ```
 
+Demo video : https://m.youtube.com/watch?v=7-ARs6UO6Vg
 That’s it: client on http://localhost:3000, server on http://localhost:5000.
 
 ## 🙏 Thanks
